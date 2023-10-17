@@ -1,4 +1,4 @@
-module github.com/mdehoog/op-anvil
+module github.com/ethereum-optimism/mocktimism
 
 go 1.21
 
