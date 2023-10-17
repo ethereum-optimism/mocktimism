@@ -17,6 +17,7 @@ chain_id = 10
 gas_limit = 420
 
 # EVM options
+
 accounts = 10
 balance = 1000
 steps-tracing = true
@@ -53,3 +54,4 @@ port = 8546
 host = "127.0.0.1"
 block_time = 2
 prune_history = false
+
