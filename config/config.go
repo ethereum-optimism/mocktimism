@@ -13,7 +13,7 @@ type GlobalConfig struct {
 }
 
 type ForkConfig struct {
-	ForkChainID        int    `toml:"fork_chain_id"`
+	ForkChainId        int    `toml:"fork_chain_id"`
 	ForkURL            string `toml:"fork_url"`
 	BlockBaseFeePerGas int    `toml:"block_base_fee_per_gas"`
 }
@@ -21,7 +21,7 @@ type ForkConfig struct {
 type EnvironmentConfig struct {
 	L1BlockBaseFeePerGas *int `toml:"l1_block_base_fee_per_gas,omitempty"`
 	BlockBaseFeePerGas   int  `toml:"block_base_fee_per_gas"`
-	ChainID              int  `toml:"chain_id"`
+	ChainId              int  `toml:"chain_id"`
 	GasLimit             int  `toml:"gas_limit"`
 }
 
@@ -40,8 +40,8 @@ type ServerConfig struct {
 }
 
 type ChainConfig struct {
-	ID           string              `toml:"id"`
-	ForkConfigs  []ForkConfig        `toml:"fork-config"`
+	Id           string              `toml:"id"`
+	Fork         ForkConfig          `toml:"fork"`
 	Environments []EnvironmentConfig `toml:"environment"`
 	Evms         []EvmConfig         `toml:"evm"`
 	Servers      []ServerConfig      `toml:"server"`
@@ -49,8 +49,8 @@ type ChainConfig struct {
 
 type Configuration struct {
 	Global GlobalConfig `toml:"global"`
-	L1     ChainConfig  `toml:"L1"`
-	L2     ChainConfig  `toml:"L2"`
+	L1     ChainConfig  `toml:"l1"`
+	L2     ChainConfig  `toml:"l2"`
 }
 
 func LoadNewConfig(log log.Logger, path string) (Configuration, error) {
@@ -72,4 +72,6 @@ func LoadNewConfig(log log.Logger, path string) (Configuration, error) {
 
 	log.Info("loaded new configuration", "config", cfg)
 	return cfg, nil
+
+	// TODO add more validation checks https://github.com/ethereum-optimism/mocktimism/issues/2
 }

@@ -20,10 +20,10 @@ func TestLoadConfigFromFile(t *testing.T) {
 		state = '/path/to/my/persisted-state'
 		silent = false
 
-		[L1]
+		[l1]
 		id = 'mainnet'
 
-		[[fork-config]]
+		[[fork]]
 		fork_chain_id = 1
 		fork_url = "https://mainnet.alchemy.infura"
 		block_base_fee_per_gas = 420
@@ -45,11 +45,11 @@ func TestLoadConfigFromFile(t *testing.T) {
 		block_time = 12
 		prune_history = false
 
-		[L2]
+		[l2]
 		id = "optimism"
 		l1 = "mainnet"
 
-		[[fork-config]]
+		[[fork]]
 		fork_chain_id = 10
 		fork_url = "https://op.alchemy.infura"
 		block_base_fee_per_gas = 420
@@ -91,9 +91,9 @@ func TestLoadConfigFromFile(t *testing.T) {
 	require.Equal(t, false, conf.Global.Silent)
 
 	// L1
-	require.Equal(t, "mainnet", conf.L1.ID)
-	require.Equal(t, 1, conf.L1.ForkConfigs[0].ForkChainID)
-	require.Equal(t, "https://mainnet.alchemy.infura", conf.L1.ForkConfigs[0].ForkURL)
+	require.Equal(t, "mainnet", conf.L1.Id)
+	require.Equal(t, 1, conf.L1.Fork.ForkChainId)
+	require.Equal(t, "https://mainnet.alchemy.infura", conf.L1.Fork.ForkURL)
 	require.Equal(t, 420, conf.L1.Environments[0].BlockBaseFeePerGas)
 	require.Equal(t, 10, conf.L1.Evms[0].Accounts)
 	require.Equal(t, 1000, conf.L1.Evms[0].Balance)
@@ -105,9 +105,9 @@ func TestLoadConfigFromFile(t *testing.T) {
 	require.Equal(t, false, conf.L1.Servers[0].PruneHistory)
 
 	// L2
-	require.Equal(t, "optimism", conf.L2.ID)
-	require.Equal(t, 10, conf.L2.ForkConfigs[0].ForkChainID)
-	require.Equal(t, "https://op.alchemy.infura", conf.L2.ForkConfigs[0].ForkURL)
+	require.Equal(t, "optimism", conf.L2.Id)
+	require.Equal(t, 10, conf.L2.Fork.ForkChainId)
+	require.Equal(t, "https://op.alchemy.infura", conf.L2.Fork.ForkURL)
 	require.Equal(t, 420, *conf.L2.Environments[0].L1BlockBaseFeePerGas)
 	require.Equal(t, 10, conf.L2.Evms[0].Accounts)
 	require.Equal(t, 1000, conf.L2.Evms[0].Balance)
@@ -118,5 +118,5 @@ func TestLoadConfigFromFile(t *testing.T) {
 	require.Equal(t, 2, conf.L2.Servers[0].BlockTime)
 	require.Equal(t, false, conf.L2.Servers[0].PruneHistory)
 
-	// TODO add more validation checks
+	// TODO add more validation checks https://github.com/ethereum-optimism/mocktimism/issues/2
 }
