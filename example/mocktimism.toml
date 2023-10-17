@@ -1,0 +1,60 @@
+# Global Configuration
+[global]
+state = '/path/to/my/persisted-state'
+silent = false
+
+# L1 Chain Configuration
+[L1]
+id = 'mainnet'
+
+[[fork-config]]
+fork_chain_id = 1
+fork_url = "https://mainnet.alchemy.infura"
+block_base_fee_per_gas = 420
+
+[[environment]]
+block_base_fee_per_gas = 420
+chain_id = 10
+gas_limit = 420
+
+[[evm]]
+accounts = 10
+balance = 1000
+steps-tracing = true
+
+[[server]]
+allow-origin = "*"
+port = 8545
+host = "127.0.0.1"
+block_time = 12
+prune_history = false
+
+# L2 Chain Configuration
+[L2]
+id = "optimism"
+l1 = "mainnet"
+
+[[fork-config]]
+fork_chain_id = 10
+fork_url = "https://op.alchemy.infura"
+block_base_fee_per_gas = 420
+
+[[environment]]
+# Optionally override the l1 or set it if not running an l1
+l1_block_base_per_gas = 420
+block_base_fee_per_gas = 420
+chain_id = 10
+gas_limit = 420
+
+[[evm]]
+accounts = 10
+balance = 1000
+steps-tracing = true
+
+[[server]]
+allow-origin = "*"
+port = 8546
+host = "127.0.0.1"
+block_time = 2
+prune_history = false
+
