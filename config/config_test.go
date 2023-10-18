@@ -16,62 +16,62 @@ func TestLoadConfigFromFile(t *testing.T) {
 	defer tmpfile.Close()
 
 	testData := `
-		[global]
-		state = '/path/to/my/persisted-state'
-		silent = false
+[profile.default]
+state = "/path/to/state"
+silent = false
 
-		[l1]
-		id = 'mainnet'
+# l1 chain
+[[profile.default.chains]]
+id = "mainnet"
+base_chain_id = "mainnet"
 
-		[[fork]]
-		fork_chain_id = 1
-		fork_url = "https://mainnet.alchemy.infura"
-		block_base_fee_per_gas = 420
+# Fork options
+fork_chain_id = 1
+fork_url = "https://mainnet.alchemy.infura.io"
+block_base_fee_per_gas = 420
 
-		[[environment]]
-		block_base_fee_per_gas = 420
-		chain_id = 10
-		gas_limit = 420
+# Chain options
+chain_id = 10
+gas_limit = 420
 
-		[[evm]]
-		accounts = 10
-		balance = 1000
-		steps-tracing = true
+# EVM options
+accounts = 10
+balance = 1000
+steps-tracing = true
 
-		[[server]]
-		allow-origin = "*"
-		port = 8545
-		host = "127.0.0.1"
-		block_time = 12
-		prune_history = false
+# Server options
+allow-origin = "*"
+port = 8545
+host = "127.0.0.1"
+block_time = 12
+prune_history = false
 
-		[l2]
-		id = "optimism"
-		l1 = "mainnet"
+# l2 chain
+[[profile.default.chains]]
+id = "optimism"
+base_chain_id = "mainnet"
 
-		[[fork]]
-		fork_chain_id = 10
-		fork_url = "https://op.alchemy.infura"
-		block_base_fee_per_gas = 420
+# Fork options
+fork_chain_id = 10
+fork_url = "https://op.alchemy.infura.io"
+block_base_fee_per_gas = 420
 
-		[[environment]]
-		l1_block_base_per_gas = 420
-		block_base_fee_per_gas = 420
-		chain_id = 10
-		gas_limit = 420
+# Chain options
+chain_id = 10
+gas_limit = 420
 
-		[[evm]]
-		accounts = 10
-		balance = 1000
-		steps-tracing = true
+# EVM options
+accounts = 10
+balance = 1000
+steps-tracing = true
 
-		[[server]]
-		allow-origin = "*"
-		port = 8546
-		host = "127.0.0.1"
-		block_time = 2
-		prune_history = false
-	`
+# Server options
+allow-origin = "*"
+port = 8546
+host = "127.0.0.1"
+block_time = 2
+prune_history = false
+`
 
 	data := []byte(testData)
 	err = os.WriteFile(tmpfile.Name(), data, 0644)
@@ -86,37 +86,56 @@ func TestLoadConfigFromFile(t *testing.T) {
 	conf, err := LoadNewConfig(logger, tmpfile.Name())
 	require.NoError(t, err)
 
-	// Global
-	require.Equal(t, "/path/to/my/persisted-state", conf.Global.State)
-	require.Equal(t, false, conf.Global.Silent)
+	for profileName, config := range conf.Profiles {
+		require.Equal(t, "default", profileName)
+		// Global
+		require.Equal(t, "/path/to/state", config.State)
+		require.Equal(t, false, config.Silent)
+		// First chain (L1 mainnet)
+		require.Len(t, config.Chains, 2) // Ensure we have 2 chain configurations
 
-	// L1
-	require.Equal(t, "mainnet", conf.L1.Id)
-	require.Equal(t, 1, conf.L1.Fork.ForkChainId)
-	require.Equal(t, "https://mainnet.alchemy.infura", conf.L1.Fork.ForkURL)
-	require.Equal(t, 420, conf.L1.Environments[0].BlockBaseFeePerGas)
-	require.Equal(t, 10, conf.L1.Evms[0].Accounts)
-	require.Equal(t, 1000, conf.L1.Evms[0].Balance)
-	require.Equal(t, true, conf.L1.Evms[0].StepsTracing)
-	require.Equal(t, "*", conf.L1.Servers[0].AllowOrigin)
-	require.Equal(t, 8545, conf.L1.Servers[0].Port)
-	require.Equal(t, "127.0.0.1", conf.L1.Servers[0].Host)
-	require.Equal(t, 12, conf.L1.Servers[0].BlockTime)
-	require.Equal(t, false, conf.L1.Servers[0].PruneHistory)
+		chain1 := config.Chains[0]
+		require.Equal(t, "mainnet", chain1.ID)
+		require.Equal(t, "mainnet", chain1.BaseChainID)
+		// Fork options for the first chain
+		require.Equal(t, int64(1), chain1.ForkChainID)
+		require.Equal(t, "https://mainnet.alchemy.infura.io", chain1.ForkURL)
+		require.Equal(t, int64(420), chain1.BlockBaseFeePerGas)
+		// Chain options for the first chain
+		require.Equal(t, int64(10), chain1.ChainID)
+		require.Equal(t, int64(420), chain1.GasLimit)
+		// EVM options for the first chain
+		require.Equal(t, 10, chain1.Accounts)
+		require.Equal(t, 1000, chain1.Balance)
+		require.True(t, chain1.StepsTracing)
+		// Server options for the first chain
+		require.Equal(t, "*", chain1.AllowOrigin)
+		require.Equal(t, 8545, chain1.Port)
+		require.Equal(t, "127.0.0.1", chain1.Host)
+		require.Equal(t, 12, chain1.BlockTime)
+		require.False(t, chain1.PruneHistory)
 
-	// L2
-	require.Equal(t, "optimism", conf.L2.Id)
-	require.Equal(t, 10, conf.L2.Fork.ForkChainId)
-	require.Equal(t, "https://op.alchemy.infura", conf.L2.Fork.ForkURL)
-	require.Equal(t, 420, *conf.L2.Environments[0].L1BlockBaseFeePerGas)
-	require.Equal(t, 10, conf.L2.Evms[0].Accounts)
-	require.Equal(t, 1000, conf.L2.Evms[0].Balance)
-	require.Equal(t, true, conf.L2.Evms[0].StepsTracing)
-	require.Equal(t, "*", conf.L2.Servers[0].AllowOrigin)
-	require.Equal(t, 8546, conf.L2.Servers[0].Port)
-	require.Equal(t, "127.0.0.1", conf.L2.Servers[0].Host)
-	require.Equal(t, 2, conf.L2.Servers[0].BlockTime)
-	require.Equal(t, false, conf.L2.Servers[0].PruneHistory)
+		// Second chain (L2 optimism)
+		chain2 := config.Chains[1]
+		require.Equal(t, "optimism", chain2.ID)
+		require.Equal(t, "mainnet", chain2.BaseChainID)
+		// Fork options for the second chain
+		require.Equal(t, int64(10), chain2.ForkChainID)
+		require.Equal(t, "https://op.alchemy.infura.io", chain2.ForkURL)
+		require.Equal(t, int64(420), chain2.BlockBaseFeePerGas)
+		// Chain options for the second chain
+		require.Equal(t, int64(10), chain2.ChainID)
+		require.Equal(t, int64(420), chain2.GasLimit)
+		// EVM options for the second chain
+		require.Equal(t, 10, chain2.Accounts)
+		require.Equal(t, 1000, chain2.Balance)
+		require.True(t, chain2.StepsTracing)
+		// Server options for the second chain
+		require.Equal(t, "*", chain2.AllowOrigin)
+		require.Equal(t, 8546, chain2.Port)
+		require.Equal(t, "127.0.0.1", chain2.Host)
+		require.Equal(t, 2, chain2.BlockTime)
+		require.False(t, chain2.PruneHistory)
+	}
 
-	// TODO add more validation checks https://github.com/ethereum-optimism/mocktimism/issues/2
 }
