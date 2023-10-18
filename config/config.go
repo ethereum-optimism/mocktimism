@@ -56,7 +56,7 @@ func LoadNewConfig(log log.Logger, path string) (Config, error) {
 		return cfg, err
 	}
 
-	log.Info("loaded new configuration", "config", cfg)
+	log.Debug("loaded new configuration", "config", cfg)
 
 	return cfg, nil
 	// TODO add more validation checks https://github.com/ethereum-optimism/mocktimism/issues/2
