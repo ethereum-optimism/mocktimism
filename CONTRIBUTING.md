@@ -10,7 +10,7 @@ Add [Mocktimism] specifications.
 
 **No contribution is too small and all contributions are valued.**
 
-Mocktimism is sa WIP and thus there are plenty of ways to contribute, in particular we appreciate support in the following areas:
+Mocktimism is a WIP and thus there are plenty of ways to contribute, in particular we appreciate support in the following areas:
 
 - Implementing issues. You can start off with those tagged ["good first issue"](https://github.com/ethereum-optimism/mocktimism/contribute) which are meant as introductory issues for external contributors.
 - Reporting issues. For security issues see [Security policy](https://github.com/ethereum-optimism/.github/blob/master/SECURITY.md).
