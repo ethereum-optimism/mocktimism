@@ -86,7 +86,7 @@ prune_history = false
 	conf, err := LoadNewConfig(logger, tmpfile.Name())
 	require.NoError(t, err)
 
-	for profileName, config := range conf.Profiles {
+	for profileName, config := range conf.Profile {
 		require.Equal(t, "default", profileName)
 		// Global
 		require.Equal(t, "/path/to/state", config.State)

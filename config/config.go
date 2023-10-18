@@ -7,31 +7,31 @@ import (
 )
 
 type Config struct {
-	Profiles map[string]Profile
+	Profile map[string]Profile `toml:"profile"`
 }
 
 type Profile struct {
-	State  string
-	Silent bool
-	Chains []Chain
+	State  string  `toml:"state"`
+	Silent bool    `toml:"silent"`
+	Chains []Chain `toml:"chains"`
 }
 
 type Chain struct {
-	ID                 string
-	BaseChainID        string
-	ForkChainID        int64
-	ForkURL            string
-	BlockBaseFeePerGas int64
-	ChainID            int64
-	GasLimit           int64
-	Accounts           int
-	Balance            int
-	StepsTracing       bool
-	AllowOrigin        string
-	Port               int
-	Host               string
-	BlockTime          int
-	PruneHistory       bool
+	ID                 string `toml:"id"`
+	BaseChainID        string `toml:"base_chain_id"`
+	ForkChainID        int64  `toml:"fork_chain_id"`
+	ForkURL            string `toml:"fork_url"`
+	BlockBaseFeePerGas int64  `toml:"block_base_fee_per_gas"`
+	ChainID            int64  `toml:"chain_id"`
+	GasLimit           int64  `toml:"gas_limit"`
+	Accounts           int    `toml:"accounts"`
+	Balance            int    `toml:"balance"`
+	StepsTracing       bool   `toml:"steps-tracing"`
+	AllowOrigin        string `toml:"allow-origin"`
+	Port               int    `toml:"port"`
+	Host               string `toml:"host"`
+	BlockTime          int    `toml:"block_time"`
+	PruneHistory       bool   `toml:"prune_history"`
 }
 
 func LoadNewConfig(log log.Logger, path string) (Config, error) {
