@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/ethereum-optimism/mocktimism/config"
 	"github.com/stretchr/testify/require"
 	"io"
 	"os"
@@ -71,6 +73,52 @@ host = "127.0.0.1"
 block_time = 2
 prune_history = false
 `
+
+	expectedConfig := config.Config{
+		Profile: map[string]config.Profile{
+			"default": {
+				State:  "/path/to/state",
+				Silent: false,
+				Chains: []config.Chain{
+					{
+						ID:                 "mainnet",
+						BaseChainID:        "",
+						ForkChainID:        0,
+						ForkURL:            "",
+						BlockBaseFeePerGas: 0,
+						ChainID:            0,
+						GasLimit:           0,
+						Accounts:           10,
+						Balance:            1000,
+						StepsTracing:       false,
+						AllowOrigin:        "",
+						Port:               8545,
+						Host:               "127.0.0.1",
+						BlockTime:          0,
+						PruneHistory:       false,
+					},
+					{
+						ID:                 "optimism",
+						BaseChainID:        "",
+						ForkChainID:        0,
+						ForkURL:            "",
+						BlockBaseFeePerGas: 0,
+						ChainID:            0,
+						GasLimit:           0,
+						Accounts:           10,
+						Balance:            1000,
+						StepsTracing:       false,
+						AllowOrigin:        "",
+						Port:               8546,
+						Host:               "127.0.0.1",
+						BlockTime:          0,
+						PruneHistory:       false,
+					},
+				},
+			},
+		},
+	}
+
 	data := []byte(testData)
 	err = os.WriteFile(tmpfile.Name(), data, 0644)
 	require.NoError(t, err)
@@ -88,8 +136,6 @@ prune_history = false
 	out, _ := io.ReadAll(r)
 	os.Stdout = oldStdout
 
-	expected := `
-t=2023-10-18T09:11:41-0700 lvl=eror msg=\"unknown fields in new config file\" role=mocktimism fields=\"[profile.default profile.default.state profile.default.silent profile.default.chains profile.default.chains.id profile.default.chains.base_chain_id profile.default.chains.fork_chain_id profile.default.chains.fork_url profile.default.chains.block_base_fee_per_gas profile.default.chains.chain_id profile.default.chains.gas_limit profile.default.chains.accounts profile.default.chains.balance profile.default.chains.steps-tracing profile.default.chains.allow-origin profile.default.chains.port profile.default.chains.host profile.default.chains.block_time profile.default.chains.prune_history profile.default.chains profile.default.chains.id profile.default.chains.base_chain_id profile.default.chains.fork_chain_id profile.default.chains.fork_url profile.default.chains.block_base_fee_per_gas profile.default.chains.chain_id profile.default.chains.gas_limit profile.default.chains.accounts profile.default.chains.balance profile.default.chains.steps-tracing profile.default.chains.allow-origin profile.default.chains.port profile.default.chains.host profile.default.chains.block_time profile.default.chains.prune_history]\"\n{\n\t\"Profiles\": null\n}
-  `
-	require.Equal(t, expected, string(out))
+	expectedBytes, _ := json.MarshalIndent(expectedConfig, "", "\t")
+	require.Equal(t, string(expectedBytes), string(out))
 }
