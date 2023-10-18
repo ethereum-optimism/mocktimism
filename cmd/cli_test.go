@@ -16,6 +16,7 @@ func TestCliConfigCommand(t *testing.T) {
 	defer os.Remove(tmpfile.Name())
 	defer tmpfile.Close()
 
+	// TODO can move this to shared test fixture folder https://github.com/ethereum-optimism/mocktimism/issues/29
 	testData := `
 [profile.default]
 state = "/path/to/state"
@@ -74,6 +75,7 @@ block_time = 2
 prune_history = false
 `
 
+	// TODO can move this to shared test fixture folder https://github.com/ethereum-optimism/mocktimism/issues/29
 	expectedConfig := config.Config{
 		Profile: map[string]config.Profile{
 			"default": {
@@ -82,43 +84,42 @@ prune_history = false
 				Chains: []config.Chain{
 					{
 						ID:                 "mainnet",
-						BaseChainID:        "",
-						ForkChainID:        0,
-						ForkURL:            "",
-						BlockBaseFeePerGas: 0,
-						ChainID:            0,
-						GasLimit:           0,
+						BaseChainID:        "mainnet",
+						ForkChainID:        1,
+						ForkURL:            "https://mainnet.alchemy.infura.io",
+						BlockBaseFeePerGas: 420,
+						ChainID:            10,
+						GasLimit:           420,
 						Accounts:           10,
 						Balance:            1000,
-						StepsTracing:       false,
-						AllowOrigin:        "",
+						StepsTracing:       true,
+						AllowOrigin:        "*",
 						Port:               8545,
 						Host:               "127.0.0.1",
-						BlockTime:          0,
+						BlockTime:          12,
 						PruneHistory:       false,
 					},
 					{
 						ID:                 "optimism",
-						BaseChainID:        "",
-						ForkChainID:        0,
-						ForkURL:            "",
-						BlockBaseFeePerGas: 0,
-						ChainID:            0,
-						GasLimit:           0,
+						BaseChainID:        "mainnet",
+						ForkChainID:        10,
+						ForkURL:            "https://op.alchemy.infura.io",
+						BlockBaseFeePerGas: 420,
+						ChainID:            10,
+						GasLimit:           420,
 						Accounts:           10,
 						Balance:            1000,
-						StepsTracing:       false,
-						AllowOrigin:        "",
+						StepsTracing:       true,
+						AllowOrigin:        "*",
 						Port:               8546,
 						Host:               "127.0.0.1",
-						BlockTime:          0,
+						BlockTime:          2,
 						PruneHistory:       false,
 					},
 				},
 			},
 		},
 	}
-
 	data := []byte(testData)
 	err = os.WriteFile(tmpfile.Name(), data, 0644)
 	require.NoError(t, err)
