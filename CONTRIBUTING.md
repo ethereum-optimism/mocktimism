@@ -92,3 +92,7 @@ make lint
 ### Writing Docs
 
 User docs are in [./docs](docs/).
+
+### Running foundry locally
+
+Foundry can be ran locally if you want to poke at foundry while using mocktimism. [Docs](https://github.com/foundry-rs/foundry/tree/master/foundryup#note---branch---repo-and---version-flags-are-ignored-during-local-installations)
