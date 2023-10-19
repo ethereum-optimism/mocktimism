@@ -57,14 +57,38 @@ git clone git@github.com:ethereum-optimism/mocktimism.git
 cd mocktimism
 ```
 
-### Running Mocktimism fixtures
-
-TODO
-
 ### Running tests
 
-TODO
+```
+make test
+```
 
-### Writing docs
+### Running build
 
-TODO
+```
+make build
+```
+
+Or build with docker
+
+```
+make docker
+```
+
+### Running linters
+
+Go tidy to clean up go dependencies
+
+```
+make tidy
+```
+
+Linter with autofix
+
+```
+make lint
+```
+
+### Writing Docs
+
+User docs are in [./docs](docs/).
