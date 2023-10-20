@@ -94,7 +94,6 @@ func (a *AnvilService) HealthCheck() (bool, error) {
 		return false, fmt.Errorf("failed to dial RPC: %v", err)
 	}
 	defer client.Close()
-	
 	var result string
 	err = client.Call(&result, "eth_blockNumber")
 	if err != nil {
