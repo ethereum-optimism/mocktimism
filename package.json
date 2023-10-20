@@ -12,8 +12,7 @@
 	],
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/evmts/evmts-monorepo.git",
-		"directory": "schemas"
+		"url": "https://github.com/ethereum-optimism/mocktimism.git"
 	},
 	"license": "MIT",
 	"contributors": [
