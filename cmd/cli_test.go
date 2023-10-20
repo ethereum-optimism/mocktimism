@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/ethereum-optimism/mocktimism/config"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/ethereum-optimism/mocktimism/config"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCliConfigCommand(t *testing.T) {
