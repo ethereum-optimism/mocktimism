@@ -23,6 +23,12 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 				Description: "Display the current mocktimism config",
 				Action:      actionConfig,
 			},
+			{
+				Name:        "up",
+				Flags:       flags,
+				Description: "Spins up a mocktimism devnet",
+				Action:      actionUp,
+			},
 		},
 	}
 }
