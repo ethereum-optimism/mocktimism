@@ -1,6 +1,6 @@
 # Configuration
 
-Mocktimism can be configured via cli flags or a `mocktimism.toml` file.
+Mocktimism can be configured via cli flags or a `mocktimism.toml` file. By default, `mocktimism.toml` is expected to exist in the root of the package. Otherwise, the program will recursively look for the file.
 
 ## Table of Contents
 - [Global Configuration](#global-configuration)
