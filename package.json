@@ -1,0 +1,42 @@
+{
+	"name": "@eth-optimism/mocktimism-alpha",
+	"version": "0.0.1",
+	"private": false,
+	"description": "Mocktimism is the placeholder name for a rollup wrapper around anvil and other devenets",
+	"keywords": [
+		"anvil",
+		"forge",
+		"foundry",
+		"optimism",
+		"blockchain"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/evmts/evmts-monorepo.git",
+		"directory": "schemas"
+	},
+	"license": "MIT",
+	"contributors": [
+		"Optimism PBC",
+		"Base"
+	],
+	"type": "module",
+	"bin": {
+    "mocktimism": "./bin/mocktimism"
+  },
+	"files": [
+		"bin",
+		"docs",
+		"README.md"
+	],
+	"scripts": {
+		"build": "make build",
+		"lint": "make lint",
+		"lint:check": "make lint:check",
+		"test": "make test",
+    "release": "npm run build && npm publish --tag latest --access=public"
+	},
+	"publishConfig": {
+		"access": "public"
+	}
+}

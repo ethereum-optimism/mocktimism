@@ -1,9 +1,10 @@
 package config
 
 import (
+	"os"
+
 	"github.com/BurntSushi/toml"
 	"github.com/ethereum/go-ethereum/log"
-	"os"
 )
 
 type Config struct {

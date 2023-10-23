@@ -6,12 +6,14 @@ require (
 	github.com/BurntSushi/toml v1.3.2
 	github.com/ethereum-optimism/optimism v1.1.6-rc.2.0.20231002161046-99be7c02d20c
 	github.com/ethereum/go-ethereum v1.13.4
+	github.com/grandcat/zeroconf v1.0.0
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.25.7
 )
 
 require (
 	github.com/Microsoft/go-winio v0.6.1 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.1.0 // indirect
@@ -19,7 +21,8 @@ require (
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/holiman/uint256 v1.2.3 // indirect
-	github.com/pelletier/go-toml v1.9.5 // indirect
+	github.com/miekg/dns v1.1.55 // indirect
+ 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
@@ -30,6 +33,7 @@ require (
 	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/mod v0.12.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect

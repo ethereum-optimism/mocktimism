@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/ethereum-optimism/mocktimism/config"
-	"github.com/pelletier/go-toml"
-	"github.com/stretchr/testify/require"
 	"io"
 	"os"
 	"testing"
+
+	"github.com/ethereum-optimism/mocktimism/config"
+  "github.com/pelletier/go-toml"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCliConfigCommand(t *testing.T) {

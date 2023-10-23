@@ -1,28 +1,40 @@
-# Define your project name and binary name
-PROJECT_NAME := mocktimism
-BINARY_NAME := $(PROJECT_NAME)
+GITCOMMIT := $(shell git rev-parse HEAD)
+GITDATE := $(shell git show -s --format='%ct')
 
-# Set the project directory
-PROJ_DIR := cmd
+LDFLAGSSTRING +=-X main.GitCommit=$(GITCOMMIT)
+LDFLAGSSTRING +=-X main.GitDate=$(GITDATE)
+LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
-# Set the output directory
-BIN_DIR := bin
+GOPATH:=$(shell go env GOPATH)
 
-# Specify the Go compiler
-GO := go
+.PHONY: update
+update:
+	@go get -u
 
-# Define build flags
-BUILD_FLAGS := -v
+.PHONY: tidy
+tidy:
+	@go mod tidy
 
-# Define targets
-.PHONY: all build clean
-
-all: build
-
+.PHONY: build
 build:
-	@echo "Building $(BINARY_NAME)..."
-	$(GO) build $(BUILD_FLAGS) -o ./$(PROJ_DIR)/$(BIN_DIR)/$(BINARY_NAME) ./$(PROJ_DIR)
+	@env GO111MODULE=on go build -v $(LDFLAGS) -o bin/mocktimism ./cmd
 
+.PHONY: test
+test:
+	@go test -v ./...
+
+.PHONY: docker
+docker:
+	@docker build -t mocktimism:latest .
+
+.PHONY: clean
 clean:
-	@echo "Cleaning up..."
-	rm -rf ./$(PROJ_DIR)/$(BIN_DIR)
+	@rm bin/mocktimism
+
+.PHONY: lint
+lint:
+	@golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell,errorlint --fix --timeout 5m -e "errors.As" -e "errors.Is" ./...
+
+.PHONY: lintcheck
+lintcheck:
+	@golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell,errorlint --timeout 5m -e "errors.As" -e "errors.Is" ./...
