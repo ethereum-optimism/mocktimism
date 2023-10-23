@@ -7,8 +7,11 @@ import (
 )
 
 func newCli(GitCommit string, GitDate string) *cli.App {
-	flags := []cli.Flag{ConfigFlag}
-	flags = append(flags, oplog.CLIFlags("MOCKTIMISM")...)
+	configFlags := []cli.Flag{
+		ConfigFlag,
+		JsonFlag,
+	}
+	configFlags = append(configFlags, oplog.CLIFlags("MOCKTIMISM")...)
 	return &cli.App{
 		Version:              params.VersionWithCommit(GitCommit, GitDate),
 		Description:          "A cli wrapper around anvil for spinning up devnets",
@@ -16,7 +19,7 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 		Commands: []*cli.Command{
 			{
 				Name:        "config",
-				Flags:       flags,
+				Flags:       configFlags,
 				Description: "Display the current mocktimism config",
 				Action:      actionConfig,
 			},

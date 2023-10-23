@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/ethereum-optimism/mocktimism/config"
+	"github.com/pelletier/go-toml"
 	"github.com/stretchr/testify/require"
 	"io"
 	"os"
@@ -77,7 +77,7 @@ prune_history = false
 
 	// TODO can move this to shared test fixture folder https://github.com/ethereum-optimism/mocktimism/issues/29
 	expectedConfig := config.Config{
-		Profile: map[string]config.Profile{
+		Profiles: map[string]config.Profile{
 			"default": {
 				State:  "/path/to/state",
 				Silent: false,
@@ -137,6 +137,6 @@ prune_history = false
 	out, _ := io.ReadAll(r)
 	os.Stdout = oldStdout
 
-	expectedBytes, _ := json.MarshalIndent(expectedConfig, "", "\t")
+	expectedBytes, _ := toml.Marshal(expectedConfig)
 	require.Equal(t, string(expectedBytes), string(out))
 }

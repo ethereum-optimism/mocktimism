@@ -7,7 +7,7 @@ import (
 )
 
 type Config struct {
-	Profile map[string]Profile `toml:"profile"`
+	Profiles map[string]Profile `toml:"profile"`
 }
 
 type Profile struct {
