@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum-optimism/mocktimism/config"
 
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
+	"github.com/pelletier/go-toml"
 	"github.com/urfave/cli/v2"
 )
 
@@ -18,7 +19,12 @@ func actionConfig(ctx *cli.Context) error {
 		log.Error("failed to load config", "err", err)
 		return err
 	}
-	s, _ := json.MarshalIndent(cfg, "", "\t")
-	fmt.Print(string(s))
+	if ctx.Bool(JsonFlag.Name) {
+		s, _ := json.MarshalIndent(cfg, "", "\t")
+		fmt.Print(string(s))
+	} else {
+		s, _ := toml.Marshal(cfg)
+		fmt.Print(string(s))
+	}
 	return nil
 }
