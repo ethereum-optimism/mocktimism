@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ethereum-optimism/mocktimism/config"
-  "github.com/pelletier/go-toml"
+    "github.com/pelletier/go-toml"
 	"github.com/stretchr/testify/require"
 )
 
