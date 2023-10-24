@@ -1,0 +1,6 @@
+preload = ["./plugins.ts"]
+
+# Use plugin in tests too
+[test]
+preload = ["./plugins.ts"]
+
