@@ -96,3 +96,7 @@ User docs are in [./docs](docs/).
 ### Running foundry locally
 
 Foundry can be ran locally if you want to poke at foundry while using mocktimism. [Docs](https://github.com/foundry-rs/foundry/tree/master/foundryup#note---branch---repo-and---version-flags-are-ignored-during-local-installations)
+
+### Example fixture
+
+An example fixture running mocktimism in a javascript test exists in [./example](./example)
