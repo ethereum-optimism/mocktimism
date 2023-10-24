@@ -15,6 +15,10 @@ update:
 tidy:
 	@go mod tidy
 
+.PHONY: run
+run:
+	@go run ./cmd config --config ./example/mocktimism.toml
+
 .PHONY: build
 build:
 	@env GO111MODULE=on go build -v $(LDFLAGS) -o bin/mocktimism ./cmd
