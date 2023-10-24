@@ -90,3 +90,9 @@ export const mintOnL2 = async () => {
 
 	return l2TxReceipt
 }
+
+if (import.meta.main) {
+	mintOnL2().then(console.log).catch(e => {
+		console.error(e)
+	})
+}
