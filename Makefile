@@ -7,6 +7,10 @@ LDFLAGS := -ldflags "$(LDFLAGSSTRING)"
 
 GOPATH:=$(shell go env GOPATH)
 
+.PHONY: all
+all:
+	@make build && make test && make lint && make tidy
+
 .PHONY: update
 update:
 	@go get -u
