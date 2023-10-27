@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -41,8 +42,9 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 
 					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
 					oplog.SetGlobalLogHandler(log.GetHandler())
-					cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
-					if err != nil {
+					cfg, errs := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+					if len(errs) > 0 {
+						err := errors.Join(errs...)
 						log.Error("failed to load config", "err", err)
 						return err
 					}
