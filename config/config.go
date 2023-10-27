@@ -35,6 +35,10 @@ type Chain struct {
 	// Fetch state over a remote endpoint instead of starting from an empty state.
 	// If you want to fetch state from a specific block number, add a block number like `http://localhost:8545@1400000` or use the `fork-block-number` option.
 	ForkURL string `toml:"fork_url"`
+	// Fetch state from a specific block number over a remote endpoint.
+	// If 0 latest block is used
+	// Only available on l1 chains
+	ForkBlockNumber uint `toml:"fork_block_number"`
 	// The base fee in a block
 	BlockBaseFeePerGas uint `toml:"block_base_fee_per_gas"`
 	// Set the gas limit
@@ -66,6 +70,7 @@ var DefaultProfile = Profile{
 			BaseChainID:        900,
 			ForkChainID:        0,
 			ForkURL:            "",
+			ForkBlockNumber:    0,
 			BlockBaseFeePerGas: 1000000000,
 			ChainID:            900,
 			GasLimit:           30_000_000,
@@ -105,16 +110,20 @@ func validateChains(chains []Chain) ([]Chain, []error) {
 	ports := make(map[uint]bool)
 
 	for i, chain := range chains {
-		// Validate uniqueness of ChainID and ForkChainID
+		if chain.ForkChainID != 0 && chain.ChainID != 0 && chain.ChainID != chain.ForkChainID {
+			errs = append(errs, fmt.Errorf("ForkChainID and ChainID do not match for chain %s", chain.Name))
+		}
 		if chainIDs[chain.ChainID] || chainIDs[chain.ForkChainID] {
 			errs = append(errs, fmt.Errorf("duplicate ChainID or ForkChainID detected for chain: %s", chain.Name))
 		}
+
 		if ports[chain.Port] {
 			errs = append(errs, fmt.Errorf("duplicate port detected for chain: %s", chain.Name))
 		}
 
 		// Validate BaseChainID
-		if chain.BaseChainID != 0 && chain.BaseChainID != chain.ChainID {
+		isBaseChain := chain.BaseChainID != 0 && chain.BaseChainID != chain.ChainID
+		if isBaseChain {
 			l1Exists := false
 			for _, c := range chains {
 				if c.ChainID == chain.BaseChainID || c.ForkChainID == chain.BaseChainID {
@@ -139,6 +148,13 @@ func validateChains(chains []Chain) ([]Chain, []error) {
 		}
 		forkURLs[chain.ForkURL] = true
 
+		// Validate ForkBlockNumber
+		if chain.ForkBlockNumber != 0 && chain.ForkURL == "" {
+			errs = append(errs, fmt.Errorf("ForkBlockNumber is set but no ForkURL is not provided for chain: %s", chain.Name))
+		}
+		if chain.ForkBlockNumber != 0 && !isBaseChain {
+			errs = append(errs, fmt.Errorf("ForkBlockNumber cannot be set for L2 network: %s. Try setting fork-block-number on the L1 network instead", chain.Name))
+		}
 		// Defaults
 		if chain.Host == "" {
 			chain.Host = "127.0.0.1"
