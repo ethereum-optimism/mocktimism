@@ -7,6 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/ethereum-optimism/mocktimism/config"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -65,9 +66,21 @@ func (a *AnvilService) Config() interface{} {
 }
 
 func (a *AnvilService) Start(ctx context.Context) error {
-	// TODO make sure this command exists in path https://github.com/ethereum-optimism/mocktimism/issues/61
-	// TODO user should be able to configure where in path it is https://github.com/ethereum-optimism/mocktimism/issues/61
-	a.cmd = exec.CommandContext(ctx, "anvil", "--port", fmt.Sprintf("%d", a.config.Port), "--host", a.config.Host)
+	args := []string{""}
+
+	if a.config.Port != 0 {
+		args = append(args, "--port", fmt.Sprintf("%d", a.config.Port))
+	}
+
+	if a.config.Host != "" {
+		args = append(args, "--host", a.config.Host)
+	}
+
+	if a.config.ForkBlockNumber != 0 {
+		args = append(args, "--fork-block-number", fmt.Sprintf("%d", a.config.ForkBlockNumber))
+	}
+
+	a.cmd = exec.CommandContext(ctx, "anvil", args...)
 
 	stdout, _ := a.cmd.StdoutPipe()
 	stderr, _ := a.cmd.StderrPipe()
@@ -109,16 +122,30 @@ func (a *AnvilService) Stop() error {
 }
 
 func (a *AnvilService) HealthCheck() (bool, error) {
+	client, err := a.GetClient()
+	defer client.Close()
+	if err != nil {
+		return false, err
+	}
+	_, err = a.BlockNumber(client)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func (a *AnvilService) GetClient() (*rpc.Client, error) {
 	client, err := rpc.Dial(fmt.Sprintf("http://%s:%d", a.config.Host, a.config.Port))
 	if err != nil {
-		return false, fmt.Errorf("failed to dial RPC: %w", err)
+		return nil, fmt.Errorf("failed to dial RPC: %w", err)
 	}
-	defer client.Close()
+	return client, nil
+}
 
-	var result string
-	err = client.Call(&result, "eth_blockNumber")
-	if err != nil {
-		return false, fmt.Errorf("failed to retrieve block number: %w", err)
+func (a *AnvilService) BlockNumber(client *rpc.Client) (hexutil.Uint64, error) {
+	var blockNumber hexutil.Uint64
+	if err := client.Call(&blockNumber, "eth_blockNumber"); err != nil {
+		return 0, err
 	}
-	return result != "", nil
+	return blockNumber, nil
 }
