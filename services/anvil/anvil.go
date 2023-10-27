@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/ethereum-optimism/mocktimism/service-discovery"
+	servicediscovery "github.com/ethereum-optimism/mocktimism/service-discovery"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -76,7 +76,7 @@ func (a *AnvilService) Start(ctx context.Context) error {
 
 	err := a.cmd.Start()
 	if err != nil {
-		return fmt.Errorf("failed to start Anvil: %v", err)
+		return fmt.Errorf("failed to start Anvil: %w", err)
 	}
 	return nil
 }
@@ -91,14 +91,14 @@ func (a *AnvilService) Stop() error {
 func (a *AnvilService) HealthCheck() (bool, error) {
 	client, err := rpc.Dial(fmt.Sprintf("http://%s:%d", a.hostname, a.port))
 	if err != nil {
-		return false, fmt.Errorf("failed to dial RPC: %v", err)
+		return false, fmt.Errorf("failed to dial RPC: %w", err)
 	}
 	defer client.Close()
-	
+
 	var result string
 	err = client.Call(&result, "eth_blockNumber")
 	if err != nil {
-		return false, fmt.Errorf("failed to retrieve block number: %v", err)
+		return false, fmt.Errorf("failed to retrieve block number: %w", err)
 	}
 	return result != "", nil
 }

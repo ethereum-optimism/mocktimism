@@ -13,9 +13,9 @@ var (
 		EnvVars: []string{"MOCKTIMISM_CONFIG"},
 	}
 	JsonFlag = &cli.BoolFlag{
-		Name: 	 "json",
+		Name:    "json",
 		Aliases: []string{"j"},
-		Usage:	 "print config in JSON form",
+		Usage:   "print config in JSON form",
 		EnvVars: []string{"MOCKTIMISM_CONFIG_JSON"},
 	}
 )
