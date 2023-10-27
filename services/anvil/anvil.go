@@ -48,8 +48,8 @@ func (a *AnvilService) Hostname() string {
 	return a.config.Host
 }
 
-func (a *AnvilService) Port() uint {
-	return a.config.Port
+func (a *AnvilService) Port() int {
+	return int(a.config.Port)
 }
 
 func (a *AnvilService) ServiceType() string {
@@ -60,7 +60,7 @@ func (a *AnvilService) ID() string {
 	return a.id
 }
 
-func (a *AnvilService) Config() config.Chain {
+func (a *AnvilService) Config() interface{} {
 	return a.config
 }
 
