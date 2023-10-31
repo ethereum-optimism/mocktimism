@@ -90,6 +90,12 @@ func (a *AnvilService) Start(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to start Anvil: %w", err)
 	}
+	a.logger.Info("Started Anvil...")
+	if err := a.cmd.Wait(); err != nil {
+		a.logger.Error("Anvil process terminated with an error", "error", err)
+	} else {
+		a.logger.Info("Anvil process terminated normally")
+	}
 	return nil
 }
 

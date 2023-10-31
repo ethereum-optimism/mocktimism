@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -83,9 +82,7 @@ prune_history = 0
 
 	logger := testlog.Logger(t, log.LvlInfo)
 
-	conf, errs := LoadNewConfig(logger, tmpfile.Name())
-
-	err = errors.Join(errs...)
+	conf, err := LoadNewConfig(logger, tmpfile.Name())
 
 	require.NoError(t, err)
 
@@ -147,8 +144,7 @@ prune_history = 0
 func TestLoadConfigDefaultsNoToml(t *testing.T) {
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	conf, errs := LoadNewConfig(logger, "")
-	err := errors.Join(errs...)
+	conf, err := LoadNewConfig(logger, "")
 	require.NoError(t, err)
 
 	// Now, let's verify that the defaults are set
@@ -172,9 +168,8 @@ func TestLoadConfigDefaultsWithEmptyToml(t *testing.T) {
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	conf, errs := LoadNewConfig(logger, tmpfile.Name())
+	conf, err := LoadNewConfig(logger, tmpfile.Name())
 
-	err = errors.Join(errs...)
 	require.NoError(t, err)
 
 	// Now, let's verify that the defaults are set
@@ -214,8 +209,7 @@ chain_id = 10
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	_, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	_, err = LoadNewConfig(logger, tmpfile.Name())
 	require.Error(t, err, "duplicate ChainID or ForkChainID detected for chain: %s")
 }
 
@@ -245,8 +239,7 @@ chain_id = 10
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	_, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	_, err = LoadNewConfig(logger, tmpfile.Name())
 	require.Error(t, err, "no matching L1 BaseChainID found for L2 chain:")
 }
 
@@ -277,8 +270,7 @@ fork_url = "https://op.alchemy.infura.io"
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	_, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	_, err = LoadNewConfig(logger, tmpfile.Name())
 	require.Error(t, err)
 }
 
@@ -307,8 +299,7 @@ chain_id = 10
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	cfg, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	cfg, err := LoadNewConfig(logger, tmpfile.Name())
 	require.NoError(t, err)
 
 	for _, profile := range cfg.Profiles {

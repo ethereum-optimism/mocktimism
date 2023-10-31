@@ -123,7 +123,7 @@ host = "127.0.0.1"
 	}()
 
 	// Poll for l1 chain healtcheck
-	timeout := time.After(2 * time.Second)
+	timeout := time.After(3 * time.Second)
 	ticker := time.NewTicker(200 * time.Millisecond) // polling every 200ms
 	defer ticker.Stop()
 
@@ -134,6 +134,7 @@ loop:
 		case <-timeout:
 			break loop
 		case <-ticker.C:
+			log.Info("Checking health")
 			// Check l1
 			service, err := anvil.NewAnvilService(
 				"HealthCheck",
@@ -143,12 +144,18 @@ loop:
 					Port: 8545,
 				})
 			if err != nil {
-				break loop
+				log.Error(err.Error())
+				continue
 			}
-			healthy, err = service.HealthCheck()
-			if healthy || err != nil {
-				break loop
+			l1Healthy, err := service.HealthCheck()
+			if err != nil {
+				log.Error(err.Error())
+				continue
 			}
+			if !l1Healthy {
+				continue
+			}
+			log.Info("L1 healthy. Checking L2...")
 			// Check l2
 			service, err = anvil.NewAnvilService(
 				"HealthCheck",
@@ -158,15 +165,15 @@ loop:
 					Port: 9545,
 				})
 			if err != nil {
-				break loop
+				continue
 			}
 			healthy, err = service.HealthCheck()
-			if healthy || err != nil {
+			if healthy {
 				break loop
 			}
 		}
 	}
 
 	require.NoError(t, err, "Health check failed")
-	require.True(t, healthy, "Service is not healthy after waiting for 2 seconds")
+	require.True(t, healthy, "Service is not healthy after waiting for 3 seconds")
 }

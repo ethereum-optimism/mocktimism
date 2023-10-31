@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"runtime/debug"
 	"sync"
@@ -42,19 +41,22 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 
 					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
 					oplog.SetGlobalLogHandler(log.GetHandler())
-					cfg, errs := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
-					if len(errs) > 0 {
-						err := errors.Join(errs...)
+					cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+					if err != nil {
 						log.Error("failed to load config", "err", err)
 						return err
 					}
 
 					processCtx, processCancel := context.WithCancel(ctx.Context)
 
+					log.Info("Starting services...")
 					runService := func(start func(ctx context.Context) error) {
 						wg.Add(1)
+						log.Info("starting new service...")
 						go func() {
+							log.Info("yes starting new service...")
 							defer func() {
+								log.Info("Ending")
 								if err := recover(); err != nil {
 									log.Error("Mocktimism had an unexpected fatal error", "err", err)
 									debug.PrintStack()
@@ -65,20 +67,24 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 								wg.Done()
 							}()
 
+							log.Info("Starting service")
 							errCh <- start(processCtx)
 						}()
 					}
 
 					for _, profile := range cfg.Profiles {
-						for _, chain := range profile.Chains {
+						// TODO we only want to use default or the specified profile
+						for i, chain := range profile.Chains {
 							anvil, err := anvil.NewAnvilService(chain.Name, log, chain)
 							if err != nil {
 								log.Error("failed to create anvil service", "err", err)
 								return err
 							}
+							log.Info("Starting chain", "chain", chain.Name, "index", i)
 							runService(anvil.Start)
 						}
 					}
+					wg.Wait()
 					return nil
 				},
 			},

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -209,19 +210,20 @@ func validateProfile(profile Profile, path string) (Profile, []error) {
 	return profile, errs
 }
 
-func LoadNewConfig(log log.Logger, path string) (Config, []error) {
+func LoadNewConfig(log log.Logger, path string) (Config, error) {
 	errs := []error{}
 	if path == "" {
 		return Config{
 			Profiles: map[string]Profile{
 				"default": DefaultProfile,
 			},
-		}, errs
+		}, errors.Join(errs...)
 	}
 	var cfg Config
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return cfg, append(errs, err)
+		errs = append(errs, err)
+		return cfg, errors.Join(errs...)
 	}
 
 	data = []byte(os.ExpandEnv(string(data)))
@@ -231,7 +233,8 @@ func LoadNewConfig(log log.Logger, path string) (Config, []error) {
 	md, err = toml.Decode(string(data), &cfg)
 	if err != nil {
 		log.Error("failed to decode new config file", "err", err)
-		return cfg, append(errs, err)
+		errs = append(errs, err)
+		return cfg, errors.Join(errs...)
 	}
 
 	if len(md.Undecoded()) > 0 {
@@ -257,5 +260,5 @@ func LoadNewConfig(log log.Logger, path string) (Config, []error) {
 		cfg.Profiles[profileName] = profileWithDefaults
 	}
 
-	return cfg, errs
+	return cfg, errors.Join(errs...)
 }
