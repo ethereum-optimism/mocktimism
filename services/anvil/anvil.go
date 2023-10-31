@@ -6,56 +6,68 @@ import (
 	"fmt"
 	"os/exec"
 
-	servicediscovery "github.com/ethereum-optimism/mocktimism/service-discovery"
+	"github.com/ethereum-optimism/mocktimism/config"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
+var (
+	SERVICE_TYPE = "anvil"
+)
+
 type AnvilService struct {
-	hostname    string
-	port        int
-	serviceType string
-	id          string
-	config      map[string]string
-	cmd         *exec.Cmd
-	logger      log.Logger
+	id     string
+	config config.Chain
+	cmd    *exec.Cmd
+	logger log.Logger
 }
 
-func NewAnvilService(logger log.Logger) *AnvilService {
-	return &AnvilService{
-		hostname:    "127.0.0.1",
-		port:        8545,
-		serviceType: "_anvil._tcp",
-		id:          "anvilL1",
-		config:      map[string]string{},
-		logger:      logger,
+func validateConfig(cfg config.Chain) error {
+	if cfg.Host == "" {
+		return fmt.Errorf("host is required")
 	}
+	if cfg.Port == 0 {
+		return fmt.Errorf("port is required")
+	}
+	return nil
+}
+
+func NewAnvilService(id string, logger log.Logger, cfg config.Chain) (*AnvilService, error) {
+	err := validateConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &AnvilService{
+		id:     id,
+		config: cfg,
+		logger: logger,
+	}, nil
 }
 
 func (a *AnvilService) Hostname() string {
-	return a.hostname
+	return a.config.Host
 }
 
-func (a *AnvilService) Port() int {
-	return a.port
+func (a *AnvilService) Port() uint {
+	return a.config.Port
 }
 
 func (a *AnvilService) ServiceType() string {
-	return a.serviceType
+	return SERVICE_TYPE
 }
 
 func (a *AnvilService) ID() string {
 	return a.id
 }
 
-func (a *AnvilService) Config() servicediscovery.ServiceConfig {
+func (a *AnvilService) Config() config.Chain {
 	return a.config
 }
 
 func (a *AnvilService) Start(ctx context.Context) error {
 	// TODO make sure this command exists in path https://github.com/ethereum-optimism/mocktimism/issues/61
 	// TODO user should be able to configure where in path it is https://github.com/ethereum-optimism/mocktimism/issues/61
-	a.cmd = exec.CommandContext(ctx, "anvil")
+	a.cmd = exec.CommandContext(ctx, "anvil", "--port", fmt.Sprintf("%d", a.config.Port), "--host", a.config.Host)
 
 	stdout, _ := a.cmd.StdoutPipe()
 	stderr, _ := a.cmd.StderrPipe()
@@ -89,7 +101,7 @@ func (a *AnvilService) Stop() error {
 }
 
 func (a *AnvilService) HealthCheck() (bool, error) {
-	client, err := rpc.Dial(fmt.Sprintf("http://%s:%d", a.hostname, a.port))
+	client, err := rpc.Dial(fmt.Sprintf("http://%s:%d", a.config.Host, a.config.Port))
 	if err != nil {
 		return false, fmt.Errorf("failed to dial RPC: %w", err)
 	}
