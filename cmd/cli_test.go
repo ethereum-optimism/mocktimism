@@ -26,8 +26,8 @@ silent = false
 
 # l1 chain
 [[profile.default.chains]]
-id = "mainnet"
-base_chain_id = "mainnet"
+name = "mainnet"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 1
@@ -48,12 +48,12 @@ allow-origin = "*"
 port = 8545
 host = "127.0.0.1"
 block_time = 12
-prune_history = false
+prune_history = 0
 
 # l2 chain
 [[profile.default.chains]]
-id = "optimism"
-base_chain_id = "mainnet"
+name = "optimism"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 10
@@ -74,7 +74,7 @@ allow-origin = "*"
 port = 8546
 host = "127.0.0.1"
 block_time = 2
-prune_history = false
+prune_history = 0
 `
 
 	// TODO can move this to shared test fixture folder https://github.com/ethereum-optimism/mocktimism/issues/29
@@ -85,8 +85,8 @@ prune_history = false
 				Silent: false,
 				Chains: []config.Chain{
 					{
-						ID:                 "mainnet",
-						BaseChainID:        "mainnet",
+						Name:               "mainnet",
+						BaseChainID:        1,
 						ForkChainID:        1,
 						ForkURL:            "https://mainnet.alchemy.infura.io",
 						BlockBaseFeePerGas: 420,
@@ -99,11 +99,11 @@ prune_history = false
 						Port:               8545,
 						Host:               "127.0.0.1",
 						BlockTime:          12,
-						PruneHistory:       false,
+						PruneHistory:       0,
 					},
 					{
-						ID:                 "optimism",
-						BaseChainID:        "mainnet",
+						Name:               "optimism",
+						BaseChainID:        1,
 						ForkChainID:        10,
 						ForkURL:            "https://op.alchemy.infura.io",
 						BlockBaseFeePerGas: 420,
@@ -116,7 +116,7 @@ prune_history = false
 						Port:               8546,
 						Host:               "127.0.0.1",
 						BlockTime:          2,
-						PruneHistory:       false,
+						PruneHistory:       0,
 					},
 				},
 			},
@@ -158,8 +158,8 @@ silent = false
 
 # l1 chain
 [[profile.default.chains]]
-id = "mainnet"
-base_chain_id = "mainnet"
+name = "mainnet"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 1
@@ -180,12 +180,12 @@ allow-origin = "*"
 port = 8545
 host = "127.0.0.1"
 block_time = 12
-prune_history = false
+prune_history = 0
 
 # l2 chain
 [[profile.default.chains]]
-id = "optimism"
-base_chain_id = "mainnet"
+name = "optimism"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 10
@@ -206,7 +206,7 @@ allow-origin = "*"
 port = 8546
 host = "127.0.0.1"
 block_time = 2
-prune_history = false
+prune_history = 0
 `
 
 	// TODO can move this to shared test fixture folder https://github.com/ethereum-optimism/mocktimism/issues/29
@@ -217,8 +217,8 @@ prune_history = false
 				Silent: false,
 				Chains: []config.Chain{
 					{
-						ID:                 "mainnet",
-						BaseChainID:        "mainnet",
+						Name:               "mainnet",
+						BaseChainID:        1,
 						ForkChainID:        1,
 						ForkURL:            "https://mainnet.alchemy.infura.io",
 						BlockBaseFeePerGas: 420,
@@ -231,11 +231,11 @@ prune_history = false
 						Port:               8545,
 						Host:               "127.0.0.1",
 						BlockTime:          12,
-						PruneHistory:       false,
+						PruneHistory:       0,
 					},
 					{
-						ID:                 "optimism",
-						BaseChainID:        "mainnet",
+						Name:               "optimism",
+						BaseChainID:        1,
 						ForkChainID:        10,
 						ForkURL:            "https://op.alchemy.infura.io",
 						BlockBaseFeePerGas: 420,
@@ -248,7 +248,7 @@ prune_history = false
 						Port:               8546,
 						Host:               "127.0.0.1",
 						BlockTime:          2,
-						PruneHistory:       false,
+						PruneHistory:       0,
 					},
 				},
 			},

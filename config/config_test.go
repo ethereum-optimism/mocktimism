@@ -22,8 +22,8 @@ silent = false
 
 # l1 chain
 [[profile.default.chains]]
-id = "mainnet"
-base_chain_id = "mainnet"
+name = "mainnet"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 1
@@ -44,12 +44,12 @@ allow-origin = "*"
 port = 8545
 host = "127.0.0.1"
 block_time = 12
-prune_history = false
+prune_history = 0
 
 # l2 chain
 [[profile.default.chains]]
-id = "optimism"
-base_chain_id = "mainnet"
+name = "optimism"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 10
@@ -70,7 +70,7 @@ allow-origin = "*"
 port = 8546
 host = "127.0.0.1"
 block_time = 2
-prune_history = false
+prune_history = 0
 `
 
 	data := []byte(testData)
@@ -95,47 +95,47 @@ prune_history = false
 		require.Len(t, config.Chains, 2) // Ensure we have 2 chain configurations
 
 		chain1 := config.Chains[0]
-		require.Equal(t, "mainnet", chain1.ID)
-		require.Equal(t, "mainnet", chain1.BaseChainID)
+		require.Equal(t, "mainnet", chain1.Name)
+		require.Equal(t, uint(1), chain1.BaseChainID)
 		// Fork options for the first chain
-		require.Equal(t, int64(1), chain1.ForkChainID)
+		require.Equal(t, uint(1), chain1.ForkChainID)
 		require.Equal(t, "https://mainnet.alchemy.infura.io", chain1.ForkURL)
-		require.Equal(t, int64(420), chain1.BlockBaseFeePerGas)
+		require.Equal(t, uint(420), chain1.BlockBaseFeePerGas)
 		// Chain options for the first chain
-		require.Equal(t, int64(10), chain1.ChainID)
-		require.Equal(t, int64(420), chain1.GasLimit)
+		require.Equal(t, uint(10), chain1.ChainID)
+		require.Equal(t, uint(420), chain1.GasLimit)
 		// EVM options for the first chain
-		require.Equal(t, 10, chain1.Accounts)
-		require.Equal(t, 1000, chain1.Balance)
+		require.Equal(t, uint(10), chain1.Accounts)
+		require.Equal(t, uint(1000), chain1.Balance)
 		require.True(t, chain1.StepsTracing)
 		// Server options for the first chain
 		require.Equal(t, "*", chain1.AllowOrigin)
-		require.Equal(t, 8545, chain1.Port)
+		require.Equal(t, uint(8545), chain1.Port)
 		require.Equal(t, "127.0.0.1", chain1.Host)
-		require.Equal(t, 12, chain1.BlockTime)
-		require.False(t, chain1.PruneHistory)
+		require.Equal(t, uint(12), chain1.BlockTime)
+		require.Equal(t, uint(0), chain1.PruneHistory)
 
 		// Second chain (L2 optimism)
 		chain2 := config.Chains[1]
-		require.Equal(t, "optimism", chain2.ID)
-		require.Equal(t, "mainnet", chain2.BaseChainID)
+		require.Equal(t, "optimism", chain2.Name)
+		require.Equal(t, uint(1), chain2.BaseChainID)
 		// Fork options for the second chain
-		require.Equal(t, int64(10), chain2.ForkChainID)
+		require.Equal(t, uint(10), chain2.ForkChainID)
 		require.Equal(t, "https://op.alchemy.infura.io", chain2.ForkURL)
-		require.Equal(t, int64(420), chain2.BlockBaseFeePerGas)
+		require.Equal(t, uint(420), chain2.BlockBaseFeePerGas)
 		// Chain options for the second chain
-		require.Equal(t, int64(10), chain2.ChainID)
-		require.Equal(t, int64(420), chain2.GasLimit)
+		require.Equal(t, uint(10), chain2.ChainID)
+		require.Equal(t, uint(420), chain2.GasLimit)
 		// EVM options for the second chain
-		require.Equal(t, 10, chain2.Accounts)
-		require.Equal(t, 1000, chain2.Balance)
+		require.Equal(t, uint(10), chain2.Accounts)
+		require.Equal(t, uint(1000), chain2.Balance)
 		require.True(t, chain2.StepsTracing)
 		// Server options for the second chain
 		require.Equal(t, "*", chain2.AllowOrigin)
-		require.Equal(t, 8546, chain2.Port)
+		require.Equal(t, uint(8546), chain2.Port)
 		require.Equal(t, "127.0.0.1", chain2.Host)
-		require.Equal(t, 2, chain2.BlockTime)
-		require.False(t, chain2.PruneHistory)
+		require.Equal(t, uint(2), chain2.BlockTime)
+		require.Equal(t, uint(0), chain2.PruneHistory)
 	}
 
 }
