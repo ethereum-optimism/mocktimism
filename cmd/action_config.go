@@ -16,7 +16,7 @@ func actionConfig(ctx *cli.Context) error {
 	oplog.SetGlobalLogHandler(log.GetHandler())
 	cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
 	if err != nil {
-		log.Error("failed to load config", "err", err)
+		log.Error("failed to load config", "errors", err)
 		return err
 	}
 	if ctx.Bool(JsonFlag.Name) {

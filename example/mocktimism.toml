@@ -4,8 +4,8 @@ silent = false
 
 # l1 chain
 [[profile.default.chains]]
-id = "mainnet"
-base_chain_id = "mainnet"
+name = "mainnet"
+base_chain_id = 1
 
 # Fork options
 fork_chain_id = 1
@@ -13,7 +13,7 @@ fork_url = "https://mainnet.alchemy.infura.io"
 block_base_fee_per_gas = 420
 
 # Chain options
-chain_id = 10
+chain_id = 1
 gas_limit = 420
 
 # EVM options
@@ -26,12 +26,12 @@ allow-origin = "*"
 port = 8545
 host = "127.0.0.1"
 block_time = 12
-prune_history = false
+prune_history = 0
 
 # l2 chain
 [[profile.default.chains]]
-id = "optimism"
-base_chain_id = "mainnet"
+name = "optimism"
+base_chain_id = 10
 
 # Fork options
 fork_chain_id = 10
@@ -52,4 +52,4 @@ allow-origin = "*"
 port = 8546
 host = "127.0.0.1"
 block_time = 2
-prune_history = false
+prune_history = 0

@@ -1,7 +1,10 @@
 package config
 
 import (
+	"errors"
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 	"github.com/ethereum/go-ethereum/log"
@@ -56,12 +59,12 @@ type Chain struct {
 
 var DefaultProfile = Profile{
 	State:  "",
-	Silent: true,
+	Silent: false,
 	Chains: []Chain{
 		{
 			Name:               "L1",
 			BaseChainID:        900,
-			ForkChainID:        900,
+			ForkChainID:        0,
 			ForkURL:            "",
 			BlockBaseFeePerGas: 1000000000,
 			ChainID:            900,
@@ -71,17 +74,17 @@ var DefaultProfile = Profile{
 			StepsTracing:       false,
 			AllowOrigin:        "*",
 			Port:               8545,
-			Host:               "localhost",
+			Host:               "127.0.0.1",
 			BlockTime:          0,
 			PruneHistory:       0,
 		},
 		{
 			Name:               "L2",
-			BaseChainID:        901,
-			ForkChainID:        901,
+			BaseChainID:        900,
+			ForkChainID:        0,
 			ForkURL:            "",
 			BlockBaseFeePerGas: 1000000000,
-			ChainID:            900,
+			ChainID:            901,
 			GasLimit:           30_000_000,
 			Accounts:           10,
 			Balance:            1000000000000000000,
@@ -95,11 +98,132 @@ var DefaultProfile = Profile{
 	},
 }
 
+func validateChains(chains []Chain) ([]Chain, []error) {
+	var errs []error
+	chainIDs := make(map[uint]bool)
+	forkURLs := make(map[string]bool)
+	ports := make(map[uint]bool)
+
+	for i, chain := range chains {
+		// Validate uniqueness of ChainID and ForkChainID
+		if chainIDs[chain.ChainID] || chainIDs[chain.ForkChainID] {
+			errs = append(errs, fmt.Errorf("duplicate ChainID or ForkChainID detected for chain: %s", chain.Name))
+		}
+		if ports[chain.Port] {
+			errs = append(errs, fmt.Errorf("duplicate port detected for chain: %s", chain.Name))
+		}
+
+		// Validate BaseChainID
+		if chain.BaseChainID != 0 && chain.BaseChainID != chain.ChainID {
+			l1Exists := false
+			for _, c := range chains {
+				if c.ChainID == chain.BaseChainID || c.ForkChainID == chain.BaseChainID {
+					l1Exists = true
+					break
+				}
+			}
+			if !l1Exists {
+				errs = append(errs, fmt.Errorf("no matching L1 BaseChainID found for L2 chain: %s", chain.Name))
+			}
+		}
+
+		// Validate ForkURL conditions.
+		if chain.ChainID != 0 && chain.ForkURL != "" && chain.ChainID != chain.ForkChainID {
+			errs = append(errs, fmt.Errorf("cannot set both ChainID and ForkURL for chain: %s. Did you mean to set ForkChainID?", chain.Name))
+		}
+		if chain.ForkChainID != 0 && chain.ForkURL == "" {
+			errs = append(errs, fmt.Errorf("ForkURL must be set if ForkChainID is provided for chain: %s", chain.Name))
+		}
+		if chain.ForkURL != "" && forkURLs[chain.ForkURL] {
+			errs = append(errs, fmt.Errorf("duplicate ForkURL detected: %s", chain.ForkURL))
+		}
+		forkURLs[chain.ForkURL] = true
+
+		// Defaults
+		if chain.Host == "" {
+			chain.Host = "127.0.0.1"
+		}
+		if chain.ChainID == 0 && chain.ForkURL == "" {
+			chain.ChainID = findAvailableChainID(chainIDs, 900)
+		}
+		if chain.Port == 0 {
+			chain.Port = findAvailablePort(ports, 8545)
+		}
+
+		if chain.Name == "" {
+			chain.Name = fmt.Sprintf("%d", chain.ChainID)
+		}
+
+		chains[i] = chain
+		if chain.ChainID != 0 {
+			chainIDs[chain.ChainID] = true
+		}
+		if chain.ForkChainID != 0 {
+			chainIDs[chain.ForkChainID] = true
+		}
+		ports[chain.Port] = true
+	}
+
+	return chains, errs
+}
+
+func findAvailableChainID(chainIDs map[uint]bool, startID uint) uint {
+	for {
+		if !chainIDs[startID] {
+			return startID
+		}
+		startID++
+	}
+}
+func findAvailablePort(ports map[uint]bool, startPort uint) uint {
+	for {
+		if !ports[startPort] {
+			return startPort
+		}
+		startPort++
+	}
+}
+
+func validateProfile(profile Profile, path string) (Profile, []error) {
+	if profile.State == "" {
+		profile.State = DefaultProfile.State
+	}
+	if !profile.Silent {
+		profile.Silent = DefaultProfile.Silent
+	}
+	if len(profile.Chains) == 0 {
+		profile.Chains = DefaultProfile.Chains
+	}
+
+	// Keep state "" if it is not set
+	// otherwise normalize to an absolute path
+	if profile.State != "" {
+		// normalize state to absolute path
+		baseDir := filepath.Dir(path)
+		profile.State = filepath.Clean(filepath.Join(baseDir, profile.State))
+	}
+
+	validatedChains, errs := validateChains(profile.Chains)
+
+	profile.Chains = validatedChains
+
+	return profile, errs
+}
+
 func LoadNewConfig(log log.Logger, path string) (Config, error) {
+	errs := []error{}
+	if path == "" {
+		return Config{
+			Profiles: map[string]Profile{
+				"default": DefaultProfile,
+			},
+		}, errors.Join(errs...)
+	}
 	var cfg Config
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return cfg, err
+		errs = append(errs, err)
+		return cfg, errors.Join(errs...)
 	}
 
 	data = []byte(os.ExpandEnv(string(data)))
@@ -109,16 +233,32 @@ func LoadNewConfig(log log.Logger, path string) (Config, error) {
 	md, err = toml.Decode(string(data), &cfg)
 	if err != nil {
 		log.Error("failed to decode new config file", "err", err)
-		return cfg, err
+		errs = append(errs, err)
+		return cfg, errors.Join(errs...)
 	}
 
 	if len(md.Undecoded()) > 0 {
 		log.Error("unknown fields in new config file", "fields", md.Undecoded())
-		return cfg, err
+		errs = append(errs, fmt.Errorf("unknown fields in new config file: %v", md.Undecoded()))
 	}
 
 	log.Debug("loaded new configuration", "config", cfg)
 
-	return cfg, nil
-	// TODO add more validation checks https://github.com/ethereum-optimism/mocktimism/issues/2
+	if cfg.Profiles == nil {
+		cfg.Profiles = map[string]Profile{
+			"default": DefaultProfile,
+		}
+	}
+
+	if len(cfg.Profiles) == 0 {
+		errs = append(errs, fmt.Errorf("no profiles found in config file"))
+	}
+
+	for profileName, profile := range cfg.Profiles {
+		profileWithDefaults, profileErrs := validateProfile(profile, path)
+		errs = append(errs, profileErrs...)
+		cfg.Profiles[profileName] = profileWithDefaults
+	}
+
+	return cfg, errors.Join(errs...)
 }
