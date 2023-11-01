@@ -32,9 +32,8 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 
 			log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
 			oplog.SetGlobalLogHandler(log.GetHandler())
-			cfg, errs := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
-			if len(errs) > 0 {
-				err := errors.Join(errs...)
+			cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+			if err != nil {
 				log.Error("failed to load config", "err", err)
 				return err
 			}
@@ -92,9 +91,8 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 
 					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
 					oplog.SetGlobalLogHandler(log.GetHandler())
-					cfg, errs := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
-					if len(errs) > 0 {
-						err := errors.Join(errs...)
+					cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+					if err != nil {
 						log.Error("failed to load config", "err", err)
 						return err
 					}
