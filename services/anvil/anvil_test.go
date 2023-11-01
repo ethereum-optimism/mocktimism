@@ -89,3 +89,56 @@ func TestStopWithoutStarting(t *testing.T) {
 	err = service.Stop()
 	require.Error(t, err, "Expected an error when stopping a service that hasn't been started")
 }
+
+func TestForkBlockNumber(t *testing.T) {
+	logger := log.New("module", "test")
+	cfg := config.Chain{
+		Host:            "127.0.0.1",
+		Port:            8545,
+		ForkBlockNumber: 420,
+		ForkURL:         "https://mainnet.optimism.io",
+		ForkChainID:     10,
+	}
+
+	// Initialize the AnvilService
+	service, err := NewAnvilService("TestService", logger, cfg)
+	require.NoError(t, err, "Failed to initialize the Anvil service")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	go func() {
+		err = service.Start(ctx)
+		require.NoError(t, err, "Failed to start the Anvil service")
+	}()
+
+	// Poll for health check until healthy or timeout
+	timeout := time.After(2 * time.Second)
+	ticker := time.NewTicker(200 * time.Millisecond) // polling every 200ms
+	defer ticker.Stop()
+
+	healthy := false
+loop:
+	for {
+		select {
+		case <-timeout:
+			break loop
+		case <-ticker.C:
+			healthy, err = service.HealthCheck()
+			if healthy {
+				break loop
+			}
+		}
+	}
+
+	require.NoError(t, err, "Health check failed")
+	require.True(t, healthy, "Service is not healthy after waiting for 2 seconds")
+
+	// Verify service details
+	require.Equal(t, "127.0.0.1", service.Hostname())
+	require.Equal(t, 8545, service.Port())
+	require.Equal(t, "anvil", service.ServiceType())
+
+	// Stop the service
+	err = service.Stop()
+	require.NoError(t, err, "Failed to stop the Anvil service")
+}

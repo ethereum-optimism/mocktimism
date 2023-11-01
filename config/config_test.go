@@ -340,8 +340,7 @@ fork_url = "https://op.alchemy.infura.io"
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	cfg, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	cfg, err := LoadNewConfig(logger, tmpfile.Name())
 	require.NoError(t, err)
 	for _, profile := range cfg.Profiles {
 		for _, chain := range profile.Chains {
@@ -384,8 +383,7 @@ fork_url = "https://op.alchemy.infura.io"
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	_, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	_, err = LoadNewConfig(logger, tmpfile.Name())
 	require.Error(t, err, "ForkBlockNumber is set but no ForkURL is not provided for chain: optimism")
 }
 
@@ -417,7 +415,6 @@ fork_url = "https://op.alchemy.infura.io"
 
 	// Load the configuration
 	logger := testlog.Logger(t, log.LvlInfo)
-	_, errs := LoadNewConfig(logger, tmpfile.Name())
-	err = errors.Join(errs...)
+	_, err = LoadNewConfig(logger, tmpfile.Name())
 	require.Error(t, err, "ForkBlockNumber cannot be set for L2 network: optimism. Try setting fork-block-number on the L1 network instead")
 }
