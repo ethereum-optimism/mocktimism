@@ -9,7 +9,7 @@ GOPATH:=$(shell go env GOPATH)
 
 .PHONY: all
 all:
-	@make build && make test && make lint && make tidy
+	@make tidy && make build && make test && make lint
 
 .PHONY: update
 update:
