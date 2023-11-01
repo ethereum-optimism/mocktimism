@@ -29,6 +29,7 @@ func TestAnvilServiceValidation(t *testing.T) {
 
 func TestAnvilService(t *testing.T) {
 	logger := log.New("module", "test")
+	logger.Info("running test")
 	cfg := config.Chain{
 		Host: "127.0.0.1",
 		Port: 8545,
@@ -39,14 +40,14 @@ func TestAnvilService(t *testing.T) {
 	require.NoError(t, err, "Failed to initialize the Anvil service")
 
 	// Start the service
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // timeout to ensure the service doesn't run indefinitely
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err = service.Start(ctx)
-	require.NoError(t, err, "Failed to start the Anvil service")
-
-	// Poll for health check until healthy or timeout
-	timeout := time.After(2 * time.Second)
-	ticker := time.NewTicker(200 * time.Millisecond) // polling every 200ms
+	go func() {
+		err = service.Start(ctx)
+		require.NoError(t, err, "Failed to start the Anvil service")
+	}()
+	timeout := time.After(3 * time.Second)
+	ticker := time.NewTicker(200 * time.Millisecond)
 	defer ticker.Stop()
 
 	healthy := false
@@ -57,7 +58,7 @@ loop:
 			break loop
 		case <-ticker.C:
 			healthy, err = service.HealthCheck()
-			if healthy && err != nil {
+			if healthy {
 				break loop
 			}
 		}

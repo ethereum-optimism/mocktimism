@@ -86,8 +86,10 @@ func (a *AnvilService) Start(ctx context.Context) error {
 		}
 	}()
 
+	a.logger.Info("Starting Anvil...")
 	err := a.cmd.Start()
 	if err != nil {
+		a.logger.Error("Failed to start anvil: ", err)
 		return fmt.Errorf("failed to start Anvil: %w", err)
 	}
 	a.logger.Info("Started Anvil...")

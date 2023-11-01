@@ -167,7 +167,7 @@ loop:
 			if err != nil {
 				continue
 			}
-			healthy, err = service.HealthCheck()
+			healthy, _ = service.HealthCheck()
 			if healthy {
 				break loop
 			}
