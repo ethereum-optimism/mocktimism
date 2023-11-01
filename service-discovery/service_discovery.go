@@ -2,13 +2,11 @@
 package servicediscovery
 
 import (
+	"context"
 	"log"
 
 	"github.com/grandcat/zeroconf"
 )
-
-// ServiceConfig is a type alias for a map containing service configuration key-value pairs.
-type ServiceConfig map[string]string
 
 // ServiceDiscovery manages service registration and discovery using Zeroconf.
 type ServiceDiscovery struct {
@@ -29,9 +27,9 @@ type Service interface {
 	// Returns a unique identifier for the service.
 	ID() string
 	// Returns a map containing service configuration key-value pairs.
-	Config() ServiceConfig
+	Config() interface{}
 	// Starts the service.
-	Start() error
+	Start(ctx context.Context) error
 }
 
 // NewServiceDiscovery initializes and returns a new ServiceDiscovery instance.
@@ -52,9 +50,12 @@ func NewServiceDiscovery(serviceType string) *ServiceDiscovery {
 // Register registers a given service with the ServiceDiscovery.
 // The provided service should implement the Service interface.
 func (sd *ServiceDiscovery) Register(s Service) {
-	txtRecords := make([]string, 0, len(s.Config()))
-	for key, val := range s.Config() {
-		txtRecords = append(txtRecords, key+"="+val)
+	var txtRecords []string
+	if configMap, ok := s.Config().(map[string]string); ok {
+		txtRecords = make([]string, 0, len(configMap))
+		for key, val := range configMap {
+			txtRecords = append(txtRecords, key+"="+val)
+		}
 	}
 
 	server, err := zeroconf.Register(s.Hostname(), s.ServiceType(), "local.", s.Port(), txtRecords, nil)

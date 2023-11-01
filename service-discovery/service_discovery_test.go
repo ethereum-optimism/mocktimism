@@ -1,6 +1,7 @@
 package servicediscovery
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -24,14 +25,14 @@ func (m *MockService) ID() string {
 	return "service123"
 }
 
-func (m *MockService) Config() ServiceConfig {
-	return ServiceConfig{
+func (m *MockService) Config() interface{} {
+	return map[string]string{
 		"version": "1.0",
 		"env":     "production",
 	}
 }
 
-func (m *MockService) Start() error {
+func (m *MockService) Start(ctx context.Context) error {
 	// As it's a mock service, you might not have any specific logic to run.
 	// But if you had an HTTP server or some logic here, you'd start it.
 	return nil

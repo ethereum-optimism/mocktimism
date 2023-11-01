@@ -69,7 +69,7 @@ loop:
 
 	// Verify service details
 	require.Equal(t, "127.0.0.1", service.Hostname())
-	require.Equal(t, uint(8545), service.Port())
+	require.Equal(t, 8545, service.Port())
 	require.Equal(t, "anvil", service.ServiceType())
 
 	// Stop the service
