@@ -71,11 +71,9 @@ func (a *AnvilService) Start(ctx context.Context) error {
 	if a.config.Port != 0 {
 		args = append(args, "--port", fmt.Sprintf("%d", a.config.Port))
 	}
-
 	if a.config.Host != "" {
 		args = append(args, "--host", a.config.Host)
 	}
-
 	if a.config.ForkBlockNumber != 0 {
 		args = append(args, "--fork-block-number", fmt.Sprintf("%d", a.config.ForkBlockNumber))
 	}

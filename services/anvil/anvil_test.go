@@ -104,11 +104,12 @@ func TestForkBlockNumber(t *testing.T) {
 	service, err := NewAnvilService("TestService", logger, cfg)
 	require.NoError(t, err, "Failed to initialize the Anvil service")
 
-	// Start the service
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second) // timeout to ensure the service doesn't run indefinitely
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err = service.Start(ctx)
-	require.NoError(t, err, "Failed to start the Anvil service")
+	go func() {
+		err = service.Start(ctx)
+		require.NoError(t, err, "Failed to start the Anvil service")
+	}()
 
 	// Poll for health check until healthy or timeout
 	timeout := time.After(2 * time.Second)
