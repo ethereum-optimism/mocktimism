@@ -124,7 +124,7 @@ loop:
 			break loop
 		case <-ticker.C:
 			healthy, err = service.HealthCheck()
-			if healthy || err != nil {
+			if healthy {
 				break loop
 			}
 		}

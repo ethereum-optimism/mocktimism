@@ -66,7 +66,7 @@ func (a *AnvilService) Config() interface{} {
 }
 
 func (a *AnvilService) Start(ctx context.Context) error {
-	args := []string{""}
+	args := []string{}
 
 	if a.config.Port != 0 {
 		args = append(args, "--port", fmt.Sprintf("%d", a.config.Port))
@@ -76,6 +76,12 @@ func (a *AnvilService) Start(ctx context.Context) error {
 	}
 	if a.config.ForkBlockNumber != 0 {
 		args = append(args, "--fork-block-number", fmt.Sprintf("%d", a.config.ForkBlockNumber))
+	}
+	if a.config.ForkChainID != 0 {
+		args = append(args, "--fork-chain-id", fmt.Sprintf("%d", a.config.ForkChainID))
+	}
+	if a.config.ForkURL != "" {
+		args = append(args, "--fork-url", a.config.ForkURL)
 	}
 
 	a.cmd = exec.CommandContext(ctx, "anvil", args...)
@@ -121,6 +127,9 @@ func (a *AnvilService) Stop() error {
 
 func (a *AnvilService) HealthCheck() (bool, error) {
 	client, err := a.GetClient()
+	if err != nil {
+		return false, err
+	}
 	defer client.Close()
 	if err != nil {
 		return false, err

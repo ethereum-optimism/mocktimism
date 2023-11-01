@@ -25,13 +25,17 @@ func TestGetL2BlockNumberAtSpecificL1Block(t *testing.T) {
 
 	// Initialize the AnvilService
 	service, err := NewAnvilService("TestService", logger, cfg)
+	require.NoError(t, err)
 
 	privateKey, err := crypto.GenerateKey()
-	auth := bind.NewKeyedTransactor(privateKey)
+	require.NoError(t, err)
+	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(900))
+	require.NoError(t, err)
 	auth.GasLimit = 8000000
 	from := crypto.PubkeyToAddress(privateKey.PublicKey)
 	backend := backends.NewSimulatedBackend(core.GenesisAlloc{from: {Balance: big.NewInt(params.Ether)}}, 50_000_000)
 	opts, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1337))
+	require.NoError(t, err)
 	defer backend.Close()
 
 	l2OutputOracleAddress, _, _, err := bindings.DeployL2OutputOracle(
