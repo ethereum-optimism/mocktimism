@@ -310,3 +310,114 @@ chain_id = 10
 		}
 	}
 }
+
+func TestForkBlockNumber(t *testing.T) {
+	tmpfile, err := os.CreateTemp("", "default_test.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpfile.Name())
+	defer tmpfile.Close()
+
+	testData := `
+[profile.default]
+state = "path/to/state"
+[[profile.default.chains]]
+name = "mainnet"
+base_chain_id = 1
+fork_chain_id = 1
+fork_block_number = 1234
+fork_url = "https://mainnet.alchemy.infura.io"
+[[profile.default.chains]]
+name = "optimism"
+# this should be 1 not 2
+base_chain_id = 1
+fork_chain_id = 10
+fork_url = "https://op.alchemy.infura.io"
+`
+
+	data := []byte(testData)
+	err = os.WriteFile(tmpfile.Name(), data, 0644)
+	require.NoError(t, err)
+
+	// Load the configuration
+	logger := testlog.Logger(t, log.LvlInfo)
+	cfg, errs := LoadNewConfig(logger, tmpfile.Name())
+	err = errors.Join(errs...)
+	require.NoError(t, err)
+	for _, profile := range cfg.Profiles {
+		for _, chain := range profile.Chains {
+			if chain.Name == "mainnet" {
+				require.Equal(t, uint(1234), chain.ForkBlockNumber)
+			} else if chain.Name == "optimism" {
+				require.Equal(t, uint(0), chain.ForkBlockNumber)
+			} else {
+				t.Errorf("unexpected chain name: %s", chain.Name)
+			}
+		}
+	}
+}
+
+func TestForkBlockNumberWithNoForkUrlError(t *testing.T) {
+	tmpfile, err := os.CreateTemp("", "default_test.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpfile.Name())
+	defer tmpfile.Close()
+
+	testData := `
+[profile.default]
+state = "path/to/state"
+[[profile.default.chains]]
+name = "mainnet"
+base_chain_id = 1
+fork_chain_id = 1
+fork_block_number = 1234
+[[profile.default.chains]]
+name = "optimism"
+# this should be 1 not 2
+base_chain_id = 2
+chain_id = 10
+fork_url = "https://op.alchemy.infura.io"
+`
+
+	data := []byte(testData)
+	err = os.WriteFile(tmpfile.Name(), data, 0644)
+	require.NoError(t, err)
+
+	// Load the configuration
+	logger := testlog.Logger(t, log.LvlInfo)
+	_, errs := LoadNewConfig(logger, tmpfile.Name())
+	err = errors.Join(errs...)
+	require.Error(t, err, "ForkBlockNumber is set but no ForkURL is not provided for chain: optimism")
+}
+
+func TestForkBlockNumberOnL2Error(t *testing.T) {
+	tmpfile, err := os.CreateTemp("", "default_test.toml")
+	require.NoError(t, err)
+	defer os.Remove(tmpfile.Name())
+	defer tmpfile.Close()
+
+	testData := `
+[profile.default]
+state = "path/to/state"
+[[profile.default.chains]]
+name = "mainnet"
+base_chain_id = 1
+fork_chain_id = 1
+fork_block_number = 1234
+[[profile.default.chains]]
+name = "optimism"
+# this should be 1 not 2
+base_chain_id = 2
+chain_id = 10
+fork_url = "https://op.alchemy.infura.io"
+`
+
+	data := []byte(testData)
+	err = os.WriteFile(tmpfile.Name(), data, 0644)
+	require.NoError(t, err)
+
+	// Load the configuration
+	logger := testlog.Logger(t, log.LvlInfo)
+	_, errs := LoadNewConfig(logger, tmpfile.Name())
+	err = errors.Join(errs...)
+	require.Error(t, err, "ForkBlockNumber cannot be set for L2 network: optimism. Try setting fork-block-number on the L1 network instead")
+}
