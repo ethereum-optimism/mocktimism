@@ -1,0 +1,3 @@
+[submodule "lib/optimism"]
+	path = lib/optimism
+	url = git@github.com:ethereum-optimism/optimism.git
