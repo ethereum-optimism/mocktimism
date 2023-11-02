@@ -46,3 +46,9 @@ lint:
 .PHONY: lintcheck
 lintcheck:
 	@golangci-lint run -E goimports,sqlclosecheck,bodyclose,asciicheck,misspell,errorlint --timeout 5m -e "errors.As" -e "errors.Is" ./...
+
+# To keep mocktimism as DRY as possible we want to use the existing optimism scripts to generate the genesis allocs for l1
+.PHONY: generate-allocs
+generate-allocs:
+	$(MAKE) -C lib/optimism devnet-allocs
+	cp -rf lib/optimism/.devnet/* generated/
