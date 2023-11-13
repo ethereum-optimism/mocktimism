@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/ethereum-optimism/mocktimism/config"
-	servicediscovery "github.com/ethereum-optimism/mocktimism/service-discovery"
+	"github.com/ethereum-optimism/mocktimism/orchestrator"
 	"github.com/ethereum-optimism/mocktimism/services/anvil"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
 	"github.com/ethereum/go-ethereum/params"
@@ -25,7 +25,7 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 		Description:          "A cli wrapper around anvil for spinning up devnets",
 		EnableBashCompletion: true,
 		Action: func(ctx *cli.Context) error {
-			serviceRegistry := servicediscovery.NewServiceDiscovery("mocktimism")
+			o := orchestrator.NewOrchestrator("mocktimism")
 			// TODO extract the code to run every process into a reusable function https://github.com/ethereum-optimism/mocktimism/issues/73
 			var wg sync.WaitGroup
 			errCh := make(chan error, 5)
@@ -62,7 +62,7 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 				for _, chain := range profile.Chains {
 					// Start anvil
 					anvil, err := anvil.NewAnvilService(chain.Name, log, chain)
-					serviceRegistry.Register(anvil)
+					o.Register(anvil)
 					if err != nil {
 						log.Error("failed to create anvil service", "err", err)
 						return err

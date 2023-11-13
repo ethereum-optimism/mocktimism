@@ -1,4 +1,4 @@
-package servicediscovery
+package orchestrator
 
 import (
 	"context"
@@ -38,8 +38,8 @@ func (m *MockService) Start(ctx context.Context) error {
 	return nil
 }
 
-func TestServiceDiscovery(t *testing.T) {
-	sd := NewServiceDiscovery("_workstation._tcp")
+func TestOrchestrator(t *testing.T) {
+	sd := NewOrchestrator("_workstation._tcp")
 
 	sd.Register(&MockService{})
 
