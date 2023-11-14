@@ -1,5 +1,5 @@
-// Package servicediscovery provides tools and utilities to enable service discovery using Zeroconf.
-package servicediscovery
+// Package orchestrator provides tools and utilities to enable service discovery using Zeroconf.
+package orchestrator
 
 import (
 	"context"
@@ -8,15 +8,15 @@ import (
 	"github.com/grandcat/zeroconf"
 )
 
-// ServiceDiscovery manages service registration and discovery using Zeroconf.
-type ServiceDiscovery struct {
+// Orchestrator manages service registration and discovery using Zeroconf.
+type Orchestrator struct {
 	resolver    *zeroconf.Resolver
 	services    map[string]*zeroconf.ServiceEntry
 	serviceType string
 }
 
 // Service represents the interface that a service should implement
-// to be registered and discovered using ServiceDiscovery.
+// to be registered and discovered using Orchestrator.
 type Service interface {
 	// Returns the host name of the service.
 	Hostname() string
@@ -32,24 +32,24 @@ type Service interface {
 	Start(ctx context.Context) error
 }
 
-// NewServiceDiscovery initializes and returns a new ServiceDiscovery instance.
+// NewOrchestrator initializes and returns a new Orchestrator instance.
 // The serviceType argument specifies the type of services that the instance will manage.
-func NewServiceDiscovery(serviceType string) *ServiceDiscovery {
+func NewOrchestrator(serviceType string) *Orchestrator {
 	resolver, err := zeroconf.NewResolver(nil)
 	if err != nil {
 		log.Fatalf("Failed to initialize resolver: %v", err)
 	}
 
-	return &ServiceDiscovery{
+	return &Orchestrator{
 		resolver:    resolver,
 		services:    make(map[string]*zeroconf.ServiceEntry),
 		serviceType: serviceType,
 	}
 }
 
-// Register registers a given service with the ServiceDiscovery.
+// Register registers a given service with the Orchestrator.
 // The provided service should implement the Service interface.
-func (sd *ServiceDiscovery) Register(s Service) {
+func (sd *Orchestrator) Register(s Service) {
 	var txtRecords []string
 	if configMap, ok := s.Config().(map[string]string); ok {
 		txtRecords = make([]string, 0, len(configMap))
@@ -73,8 +73,8 @@ func (sd *ServiceDiscovery) Register(s Service) {
 	defer server.Shutdown()
 }
 
-// GetServices returns a list of service IDs that are currently registered with the ServiceDiscovery.
-func (sd *ServiceDiscovery) GetServices() []string {
+// GetServices returns a list of service IDs that are currently registered with the Orchestrator.
+func (sd *Orchestrator) GetServices() []string {
 	ids := make([]string, 0, len(sd.services))
 	for id := range sd.services {
 		ids = append(ids, id)
@@ -84,6 +84,6 @@ func (sd *ServiceDiscovery) GetServices() []string {
 
 // GetServiceById retrieves a registered service based on its ID.
 // Returns nil if the ID does not match any registered service.
-func (sd *ServiceDiscovery) GetServiceById(id string) *zeroconf.ServiceEntry {
+func (sd *Orchestrator) GetServiceById(id string) *zeroconf.ServiceEntry {
 	return sd.services[id]
 }
