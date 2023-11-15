@@ -1,7 +1,6 @@
-// TODO generalize most of this boilerplate into a common service interface
-package opnode
+package node
 
-type OpNodeConfig struct {
+type NodeConfig struct {
 	CommandFlags CommandFlags
 	Host         string
 	Ports        Ports
@@ -33,7 +32,6 @@ type CommandFlags struct {
 	RPCEnableAdmin   bool
 }
 
-// Ports defines the port mappings for the OpNode
 type Ports struct {
 	RPCPort     int
 	P2PPort     int
@@ -41,7 +39,6 @@ type Ports struct {
 	PProfPort   int
 }
 
-// FilePaths contains paths to various configuration files needed by OpNode
 type FilePaths struct {
 	SequencerKeyPath string
 	NodeKeyPath      string
