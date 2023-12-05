@@ -1,33 +1,39 @@
-import { ChildProcess, exec } from 'child_process'
-import { mintOnL2 } from './index.js'
-import { afterAll, beforeAll, test } from 'bun:test'
-import { join } from 'path'
-import waitOn from 'wait-on'
+import { expect, afterAll, beforeAll, test } from 'bun:test'
+// @ts-ignore
+import { createNetwork, type Network } from '@eth-optimism/mocktimism'
+import { createClient, http } from 'viem'
 
-let mocktimismProcess: ChildProcess
+let network: Network
 
 beforeAll(async () => {
-	mocktimismProcess = exec(`go run ../cmd/main.go up --config ${join(__dirname, 'mocktimism.toml')}`, (err, stdout, stderr) => {
-		if (err) {
-			console.error(err)
-			throw new Error('failed to start mocktimism')
-		}
-		console.info(stdout)
-		console.error(stderr)
-	})
-
-	await waitOn({
-		resources: [
-			'http://localhost:8545',
-			'http://localhost:9545',
+	network = createNetwork({
+		chains: [
+			{
+				name: 'mainnet',
+				forkUrl: 'https://mainnet.infura.io/v3/420',
+				chainId: 1,
+			},
+			{
+				name: 'optimism',
+				forkUrl: 'https://mainnet.optimism.io',
+				chainId: 10,
+				baseChainId: 1,
+			}
 		]
 	})
+	await network.start()
 })
 
 afterAll(async () => {
-	mocktimismProcess.kill()
+	await network.stop()
 })
 
-test(mintOnL2.name, async () => {
-	await mintOnL2()
+test('should be able to create viem clients', async () => {
+	const l1Client = createClient({
+		transport: http(network.getChain('mainnet').rpcUrl),
+		chain: network.getChain('mainnet'),
+	})
+	expect(await l1Client.request({
+		method: 'eth_chainId'
+	})).toBe(network.getChain('mainnet').id)
 }) 
