@@ -11,6 +11,7 @@ import (
 	"github.com/ethereum-optimism/mocktimism/orchestrator"
 	"github.com/ethereum-optimism/mocktimism/services/anvil"
 	"github.com/ethereum-optimism/mocktimism/services/geth"
+	"github.com/ethereum-optimism/mocktimism/services/node"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/urfave/cli/v2"
@@ -130,6 +131,71 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 						}
 					}
 					return nil
+				},
+			},
+			{
+				Name:        "node",
+				Flags:       configFlags,
+				Description: "Starts the geth l2 services",
+				Action: func(ctx *cli.Context) error {
+					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
+					// cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+					nodeCfg := node.NodeConfig{
+						CommandFlags: node.CommandFlags{},
+					}
+					service, err := node.NewNodeService("op-node", log, nodeCfg)
+					if err != nil {
+						log.Error("failed to create geth service", "err", err)
+						return err
+					}
+					var wg sync.WaitGroup
+					errCh := make(chan error, 5)
+					processCtx, processCancel := context.WithCancel(ctx.Context)
+					runService := func(start func(ctx context.Context) error) {
+						wg.Add(1)
+						log.Info("starting new service...")
+						go func() {
+							log.Info("yes starting new service...")
+							defer func() {
+								log.Info("Ending")
+								if err := recover(); err != nil {
+									log.Error("Mocktimism had an unexpected fatal error", "err", err)
+									debug.PrintStack()
+									errCh <- fmt.Errorf("panic: %v", err)
+								}
+
+								processCancel()
+								wg.Done()
+							}()
+
+							log.Info("Starting service")
+							errCh <- start(processCtx)
+						}()
+					}
+
+					if true {
+						service.Start(processCtx)
+						ticker := time.NewTicker(2 * time.Second)
+						defer ticker.Stop()
+						for {
+							select {
+							case <-ticker.C:
+								healthy, err := service.HealthCheck()
+								if err != nil || !healthy {
+									log.Error("Health check failed:", err)
+									processCancel()
+									return nil
+								}
+								log.Info("health check passed")
+							case <-ctx.Done():
+								return nil
+							}
+						}
+					} else {
+						runService(service.Start)
+						log.Info("Ending service")
+						return nil
+					}
 				},
 			},
 			{

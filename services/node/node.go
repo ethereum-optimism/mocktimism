@@ -1,7 +1,6 @@
 package node
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"os/exec"
