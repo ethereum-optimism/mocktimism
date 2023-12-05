@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"runtime/debug"
 	"sync"
+	"time"
 
 	"github.com/ethereum-optimism/mocktimism/config"
 	"github.com/ethereum-optimism/mocktimism/orchestrator"
@@ -173,8 +174,30 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 							errCh <- start(processCtx)
 						}()
 					}
-					runService(service.Start)
-					return nil
+
+					if true {
+						service.Start(processCtx)
+						ticker := time.NewTicker(2 * time.Second)
+						defer ticker.Stop()
+						for {
+							select {
+							case <-ticker.C:
+								healthy, err := service.HealthCheck()
+								if err != nil || !healthy {
+									log.Error("Health check failed:", err)
+									processCancel()
+									return nil
+								}
+								log.Info("health check passed")
+							case <-ctx.Done():
+								return nil
+							}
+						}
+					} else {
+						runService(service.Start)
+						log.Info("Ending service")
+						return nil
+					}
 				},
 			},
 			{
