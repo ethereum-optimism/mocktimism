@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum-optimism/mocktimism/config"
 	"github.com/ethereum-optimism/mocktimism/orchestrator"
 	"github.com/ethereum-optimism/mocktimism/services/anvil"
+	"github.com/ethereum-optimism/mocktimism/services/geth"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/urfave/cli/v2"
@@ -131,6 +132,52 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 				},
 			},
 			{
+				Name:        "geth-l1",
+				Flags:       configFlags,
+				Description: "Starts the geth l1 services",
+				Action: func(ctx *cli.Context) error {
+					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
+					cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+					gc := geth.GethConfig{
+						OpGeth:    false,
+						HTTPPort:  int(cfg.Profiles["default"].Chains[0].Port),
+						Verbosity: 3,
+						DataDir:   "/tmp/geth",
+					}
+					service, err := geth.NewGeth("l1", log, gc, nil)
+					if err != nil {
+						log.Error("failed to create geth service", "err", err)
+						return err
+					}
+					var wg sync.WaitGroup
+					errCh := make(chan error, 5)
+					processCtx, processCancel := context.WithCancel(ctx.Context)
+					runService := func(start func(ctx context.Context) error) {
+						wg.Add(1)
+						log.Info("starting new service...")
+						go func() {
+							log.Info("yes starting new service...")
+							defer func() {
+								log.Info("Ending")
+								if err := recover(); err != nil {
+									log.Error("Mocktimism had an unexpected fatal error", "err", err)
+									debug.PrintStack()
+									errCh <- fmt.Errorf("panic: %v", err)
+								}
+
+								processCancel()
+								wg.Done()
+							}()
+
+							log.Info("Starting service")
+							errCh <- start(processCtx)
+						}()
+					}
+					runService(service.Start)
+					return nil
+				},
+			},
+			{
 				Name:        "anvil",
 				Flags:       configFlags,
 				Description: "Starts the anvil services",
@@ -138,6 +185,7 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 					// TODO extract the code to run every process into a reusable function https://github.com/ethereum-optimism/mocktimism/issues/73
 					var wg sync.WaitGroup
 					errCh := make(chan error, 5)
+					processCtx, processCancel := context.WithCancel(ctx.Context)
 
 					log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
 					oplog.SetGlobalLogHandler(log.GetHandler())
@@ -146,8 +194,6 @@ func newCli(GitCommit string, GitDate string) *cli.App {
 						log.Error("failed to load config", "err", err)
 						return err
 					}
-
-					processCtx, processCancel := context.WithCancel(ctx.Context)
 
 					log.Info("Starting services...")
 					runService := func(start func(ctx context.Context) error) {

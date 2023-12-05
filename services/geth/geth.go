@@ -41,15 +41,15 @@ var (
 	testJwtSecret      = "688f5d737bad920bdfb2fc2f488d6b6209eebda1dae949a8de91398d932c517a"
 )
 
-func NewGeth(name string, logger log.Logger, cfg GethConfig, genesis *core.Genesis, isL2 bool) (*Geth, error) {
+func NewGeth(name string, logger log.Logger, cfg GethConfig, genesis *core.Genesis) (*Geth, error) {
 	// TODO we can delete handling genesis being nil once genesis is implemented https://github.com/ethereum-optimism/mocktimism/issues/86
-	if genesis != nil {
+	if genesis == nil {
 		genesis = core.DefaultGenesisBlock()
 	}
 
 	var ethCfg *ethconfig.Config
 	var formattedName string
-	if isL2 {
+	if cfg.OpGeth {
 		formattedName = fmt.Sprintf("l2-geth-%v", name)
 		ethCfg = &ethconfig.Config{
 			// TODO some of these should be read from the toml config

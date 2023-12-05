@@ -5,7 +5,6 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
 
 	"github.com/ethereum-optimism/mocktimism/config"
 
@@ -13,14 +12,13 @@ import (
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/core"
-	"github.com/pelletier/go-toml"
 	"github.com/urfave/cli/v2"
 )
 
-//go:embed static/geth/genesis.json
+// go:embed static/geth/genesis.json
 var genesisFile []byte
 
-//go:embed static/keystore/UTC--2022-08-19T17-38-31.257380510Z--123463a4b065722e99115d6c222f267d9cabb524
+// go:embed static/keystore/UTC--2022-08-19T17-38-31.257380510Z--123463a4b065722e99115d6c222f267d9cabb524
 var keystoreFile []byte
 
 func ActionSimple(ctx *cli.Context) error {
@@ -28,6 +26,8 @@ func ActionSimple(ctx *cli.Context) error {
 	oplog.SetGlobalLogHandler(log.GetHandler())
 
 	cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
+	// TODO remove log cfg
+	log.Info("cfg", "cfg", cfg)
 	if err != nil {
 		log.Error("failed to load config", "errors", err)
 		return err
@@ -41,6 +41,8 @@ func ActionSimple(ctx *cli.Context) error {
 
 	ks := keystore.NewKeyStore("/tmp/keystore", keystore.StandardScryptN, keystore.StandardScryptP)
 	key, err := ks.Import(keystoreFile, "", "") // You might need to replace the second and third arguments with the actual passphrase
+	// TODO remove log key
+	log.Info("key", "key", key)
 	if err != nil {
 		log.Error("failed to import keystore file", "error", err)
 		return err

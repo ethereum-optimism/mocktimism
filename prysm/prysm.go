@@ -15,7 +15,7 @@ import (
 
 const prysmVersion = "v4.0.8"
 
-//go:embed static/prysm/config.yml
+// go:embed static/prysm/config.yaml
 var prysmConfigFile []byte
 
 func downloadBin(binaryName string) error {
