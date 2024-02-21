@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func buildCommandArgs(config NodeConfig) []string {
+func BuildCommandArgs(config NodeConfig) []string {
 	args := []string{
 		"--l1=" + config.CommandFlags.L1,
 		"--l2=" + config.CommandFlags.L2,

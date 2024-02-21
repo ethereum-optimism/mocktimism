@@ -1,12 +1,15 @@
 package node
 
 import (
-	"context"
 	"fmt"
 	"os/exec"
 
-	"github.com/ethereum-optimism/mocktimism/process"
+	opnode "github.com/ethereum-optimism/optimism/op-node"
+	"github.com/ethereum-optimism/optimism/op-node/metrics"
+	"github.com/ethereum-optimism/optimism/op-node/node"
+	"github.com/ethereum-optimism/optimism/op-service/cliapp"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -57,10 +60,31 @@ func (s *NodeService) HealthCheck() (bool, error) {
 	return true, nil
 }
 
-func (s *NodeService) Start(ctx context.Context) error {
-	args := buildCommandArgs(s.config)
-	s.cmd = exec.CommandContext(ctx, "op-node", args...)
-	return process.RunCommand(ctx, s.cmd, s.logger, "op-node")
+func (s *NodeService) CreateLifecycle(ctx *cli.Context) (cliapp.Lifecycle, error) {
+	cfg, err := opnode.NewConfig(ctx, s.logger)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create the rollup node config: %w", err)
+	}
+	// cfg.Cancel = closeApp
+
+	snapshotLog, err := opnode.NewSnapshotLogger(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create snapshot root logger: %w", err)
+	}
+
+	n, err := node.New(
+		ctx.Context,
+		cfg,
+		s.logger,
+		snapshotLog,
+		"TODO add version",
+		metrics.NewMetrics("default"),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create the rollup node: %w", err)
+	}
+
+	return n, nil
 }
 
 func (s *NodeService) Stop() error {
