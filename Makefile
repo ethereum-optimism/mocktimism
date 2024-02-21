@@ -19,9 +19,9 @@ update:
 tidy:
 	@go mod tidy
 
-.PHONY: run
-run:
-	@go run ./cmd config --config ./example/mocktimism.toml
+.PHONY: start
+start:
+	@go run ./cmd --config ./example/mocktimism.toml
 
 .PHONY: build
 build:
