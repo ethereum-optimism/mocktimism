@@ -13,8 +13,8 @@ import (
 
 func actionConfig(ctx *cli.Context) error {
 	log := oplog.NewLogger(oplog.AppOut(ctx), oplog.ReadCLIConfig(ctx)).New("role", "mocktimism")
-	// TODO why is this not working?
-	// oplog.SetGlobalLogHandler(log.Handler())
+	oplog.SetGlobalLogHandler(log.Handler())
+	log.Debug("running config...")
 	cfg, err := config.LoadNewConfig(log, ctx.String(ConfigFlag.Name))
 	if err != nil {
 		log.Error("failed to load config", "errors", err)
