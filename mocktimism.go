@@ -6,6 +6,10 @@ import (
 	"sync/atomic"
 
 	"github.com/ethereum-optimism/mocktimism/config"
+	"github.com/ethereum-optimism/mocktimism/services/anvil"
+	"github.com/ethereum-optimism/optimism/op-batcher/batcher"
+	"github.com/ethereum-optimism/optimism/op-node/node"
+	"github.com/ethereum-optimism/optimism/op-proposer/proposer"
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -18,6 +22,13 @@ type Mocktimism struct {
 	cfg *config.Config
 
 	stopped atomic.Bool
+
+	// services
+	anvilL1    *anvil.AnvilService
+	anvilL2    *anvil.AnvilService
+	opNode     *node.OpNode
+	opProposer *proposer.ProposerService
+	opBatcher  *batcher.BatcherService
 }
 
 func NewMocktimism(
@@ -52,23 +63,18 @@ func (m *Mocktimism) Stopped() bool {
 // Inits every service in mocktimism
 // we don't worry about initing the challenger because we are not using it
 func (m *Mocktimism) initServices(ctx context.Context) error {
-	// init anvil L1
 	if err := m.initAnvilL1(ctx); err != nil {
 		return err
 	}
-	// init anvil L2
 	if err := m.initAnvilL2(ctx); err != nil {
 		return err
 	}
-	// init op node
 	if err := m.initOpNode(ctx); err != nil {
 		return err
 	}
-	// init op proposer
 	if err := m.initOpProposer(ctx); err != nil {
 		return err
 	}
-	// init op batcher
 	if err := m.initOpBatcher(ctx); err != nil {
 		return err
 	}
