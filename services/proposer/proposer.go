@@ -35,6 +35,10 @@ func NewProposerService(id string, logger log.Logger, cfg ProposerConfig) (*Prop
 	}, nil
 }
 
+func (s *ProposerService) Start() error {
+	return nil
+}
+
 func (s *ProposerService) Hostname() string {
 	return s.config.Host
 }

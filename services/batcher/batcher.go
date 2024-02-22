@@ -35,6 +35,10 @@ func NewBatcherService(id string, logger log.Logger, cfg BatcherConfig) (*Batche
 	}, nil
 }
 
+func (s *BatcherService) Start() error {
+	return nil
+}
+
 func (s *BatcherService) Hostname() string {
 	return s.config.Host
 }

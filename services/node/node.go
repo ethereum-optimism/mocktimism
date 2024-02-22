@@ -35,6 +35,10 @@ func NewNodeService(id string, logger log.Logger, cfg NodeConfig) (*NodeService,
 	}, nil
 }
 
+func (s *NodeService) Start() error {
+	return nil
+}
+
 func (s *NodeService) Hostname() string {
 	return s.config.Host
 }
