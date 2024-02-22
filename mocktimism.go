@@ -39,14 +39,25 @@ func NewMocktimism(
 	cfg *config.Config,
 ) (*Mocktimism, error) {
 	out := &Mocktimism{log: log, shutdown: shutdown, cfg: cfg}
-	if err := out.initServices(ctx); err != nil {
-		return nil, errors.Join(err, out.Stop(ctx))
+	if err := out.initAnvilL1(ctx); err != nil {
+		return nil, err
+	}
+	if err := out.initAnvilL2(ctx); err != nil {
+		return nil, err
+	}
+	if err := out.initOpNode(ctx); err != nil {
+		return nil, err
+	}
+	if err := out.initOpProposer(ctx); err != nil {
+		return nil, err
+	}
+	if err := out.initOpBatcher(ctx); err != nil {
+		return nil, err
 	}
 	return out, nil
 }
 
 func (m *Mocktimism) Start(ctx context.Context) error {
-	m.log.Debug("starting mocktimism...")
 	m.log.Debug("starting anvil-l1...")
 	if err := m.anvilL1.Start(ctx); err != nil {
 		return fmt.Errorf("failed to start anvil-l1: %w", err)
@@ -106,6 +117,8 @@ func (m *Mocktimism) Stop(ctx context.Context) error {
 
 	if result == nil {
 		m.log.Debug("mocktimism stopped successfully")
+	} else {
+		m.log.Error("failed to stop mocktimism", "errors", result)
 	}
 
 	return result
@@ -113,27 +126,6 @@ func (m *Mocktimism) Stop(ctx context.Context) error {
 
 func (m *Mocktimism) Stopped() bool {
 	return m.stopped.Load()
-}
-
-// Inits every service in mocktimism
-// we don't worry about initing the challenger because we are not using it
-func (m *Mocktimism) initServices(ctx context.Context) error {
-	if err := m.initAnvilL1(ctx); err != nil {
-		return err
-	}
-	if err := m.initAnvilL2(ctx); err != nil {
-		return err
-	}
-	if err := m.initOpNode(ctx); err != nil {
-		return err
-	}
-	if err := m.initOpProposer(ctx); err != nil {
-		return err
-	}
-	if err := m.initOpBatcher(ctx); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (m *Mocktimism) getL1Chain(ctx context.Context) (config.Chain, error) {
